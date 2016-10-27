@@ -26,22 +26,22 @@ import (
 
 var (
 	jwtSigningSecret, _ = hex.DecodeString(jwtSecretKey)
-	jwtSigningMethod = jwt.SigningMethodHS512
-	aesTextSecret, _ = hex.DecodeString(aesTextKey)
-	aesFileSecret, _ = hex.DecodeString(aesFileKey)
-	companySecret = compSecretPrefix
-	gzipFiles = []string{".html", ".css", ".js"}
+	jwtSigningMethod    = jwt.SigningMethodHS512
+	aesTextSecret, _    = hex.DecodeString(aesTextKey)
+	aesFileSecret, _    = hex.DecodeString(aesFileKey)
+	companySecret       = compSecretPrefix
+	gzipFiles           = []string{".html", ".css", ".js"}
 )
 
 const (
 	jwtSigningDuration = time.Hour * 24 * 7
-	maxRequestBody = 10 * 1024 * 1024
+	maxRequestBody     = 10 * 1024 * 1024
 )
 
 // formatReturnJson returns a json-formatted http response to client
 func formatReturnJson(w http.ResponseWriter, r *http.Request,
-ps httprouter.Params, ec ErrorCode, eci string, login int64,
-ie map[string]interface{}) {
+	ps httprouter.Params, ec ErrorCode, eci string, login int64,
+	ie map[string]interface{}) {
 	// Create new map not to taint the argument
 	args := map[string]interface{}{}
 	for k, v := range ie {
@@ -51,7 +51,7 @@ ie map[string]interface{}) {
 		args["result"] = ResultSuccess
 	} else {
 		args["result"] = ResultFail
-		reqLang := ps[len(ps) - 2].Value
+		reqLang := ps[len(ps)-2].Value
 		ecs := ErrorCodes[reqLang][ec]
 		if eci != "" {
 			args["error"] = fmt.Sprintf(ecs, eci)
@@ -73,7 +73,7 @@ ie map[string]interface{}) {
 	fmt.Fprintf(w, rs)
 
 	// Log the response (the only exit point)
-	reqId := ps[len(ps) - 1].Value
+	reqId := ps[len(ps)-1].Value
 	serverLog.Printf("[MXAPI] (%v) |%v| RETURN: %v\n", reqId,
 		getIp(r), rs)
 }
@@ -82,8 +82,8 @@ ie map[string]interface{}) {
 // for website-related apis (with jwt) and attaches more information
 // about the return message
 func formatReturnInfo(w http.ResponseWriter, r *http.Request,
-ps httprouter.Params, ec ErrorCode, eci string, login bool,
-ie map[string]interface{}) {
+	ps httprouter.Params, ec ErrorCode, eci string, login bool,
+	ie map[string]interface{}) {
 	loginState := LoginLoggedOut
 	if login {
 		loginState = LoginLoggedIn
@@ -93,15 +93,15 @@ ie map[string]interface{}) {
 
 // formatReturn is a wrapper for formatReturnInfo that represents a generic return
 func formatReturn(w http.ResponseWriter, r *http.Request,
-ps httprouter.Params, ec ErrorCode, login bool,
-ie map[string]interface{}) {
+	ps httprouter.Params, ec ErrorCode, login bool,
+	ie map[string]interface{}) {
 	formatReturnInfo(w, r, ps, ec, "", login, ie)
 }
 
 // parseFileUpload reads a file in a multipart form post upload
 // and saves to a destined location with encryption
 func parseFileUpload(r *http.Request, name string, fileDir string,
-fileDirId interface{}, fileName string) (string, string, string, error) {
+	fileDirId interface{}, fileName string) (string, string, string, error) {
 	// Read the file contents
 	f, header, err := r.FormFile(name)
 	if err != nil {
@@ -137,7 +137,7 @@ fileDirId interface{}, fileName string) (string, string, string, error) {
 // saveFileUpload reads a file in a multipart form post upload
 // and saves to a destined location directly
 func saveFileUpload(r *http.Request, name string,
-saveDir, fileName string) error {
+	saveDir, fileName string) error {
 	// Read the file contents
 	f, _, err := r.FormFile(name)
 	if err != nil {
@@ -172,20 +172,20 @@ saveDir, fileName string) error {
 // createFileTokenName takes a filebase and filetype then creates a token for
 // download/preview along with the filename extended with suffix
 func createFileTokenName(fbase, ftype string) (string, string) {
-	b := make([]byte, TokenMinMax / 2)
+	b := make([]byte, TokenMinMax/2)
 	crand.Read(b)
 	token := fmt.Sprintf("%x", b)
 	if ftype == "application/octet-stream" {
 		return token, fbase
 	}
 	cts := strings.Split(ftype, "/")
-	return token, fbase + "." + cts[len(cts) - 1]
+	return token, fbase + "." + cts[len(cts)-1]
 }
 
 // parseFileDownload is the counterpart to parseFileUpload - which decrypts
 // files from storages and returns to clients
 func parseFileDownload(w http.ResponseWriter, r *http.Request,
-ct string, pifc string) error {
+	ct string, pifc string) error {
 	f, err := os.Open(pifc)
 	// TODO: Return an error file here
 	if err != nil {
@@ -214,7 +214,7 @@ ct string, pifc string) error {
 		cts := strings.Split(ct, "/")
 		w.Header().Set("Content-Disposition",
 			fmt.Sprintf("inline; filename=\"%v.%v\"",
-				filepath.Base(pifc), cts[len(cts) - 1]))
+				filepath.Base(pifc), cts[len(cts)-1]))
 	}
 	// Other fields will be auto-filled
 	http.ServeContent(w, r, "", time.Time{}, bytes.NewReader(file))
@@ -223,7 +223,7 @@ ct string, pifc string) error {
 
 // mxHandle is the handler function for MarketX specific functionalities
 type mxHandle func(http.ResponseWriter, *http.Request, httprouter.Params,
-*User)
+	*User)
 
 // checkAuth performs the basic operations for jwt-authentication
 // and returns error code if failed
@@ -235,7 +235,7 @@ func checkAuth(r *http.Request) (*User, ErrorCode) {
 
 	// Check jwt validity
 	token, err := jwt.Parse(auth[7:], func(token *jwt.Token) (interface{},
-	error) {
+		error) {
 		if reflect.ValueOf(token.Method).Pointer() !=
 			reflect.ValueOf(jwtSigningMethod).Pointer() {
 			return nil, fmt.Errorf("Unexpected signing method: %v",
@@ -248,7 +248,8 @@ func checkAuth(r *http.Request) (*User, ErrorCode) {
 	}
 
 	// Check for jwt expiration
-	expire, found := token.Claims["expire"]
+	claims := token.Claims.(jwt.MapClaims)
+	expire, found := claims["expire"]
 	if !found {
 		return nil, ErrorCodeJwtStoreError
 	}
@@ -261,7 +262,7 @@ func checkAuth(r *http.Request) (*User, ErrorCode) {
 	}
 
 	// Check user id value availability
-	userId, found := token.Claims["user_id"]
+	userId, found := claims["user_id"]
 	if !found {
 		return nil, ErrorCodeJwtStoreError
 	}
@@ -288,7 +289,7 @@ func checkAuth(r *http.Request) (*User, ErrorCode) {
 // generic failure json if permission is denied
 func authProtect(h mxHandle) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request,
-	ps httprouter.Params) {
+		ps httprouter.Params) {
 		u, ec := checkAuth(r)
 		if ec != ErrorCodeNone {
 			formatReturn(w, r, ps, ec, false, nil)
@@ -304,7 +305,7 @@ func authProtect(h mxHandle) httprouter.Handle {
 // admin-level users to proceed, otherwise return failure
 func adminProtect(h mxHandle) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request,
-	ps httprouter.Params) {
+		ps httprouter.Params) {
 		u, ec := checkAuth(r)
 		if ec != ErrorCodeNone {
 			formatReturn(w, r, ps, ec, false, nil)
@@ -325,7 +326,7 @@ func adminProtect(h mxHandle) httprouter.Handle {
 // is valid and returns failure result + error message
 func tokenProtect(h httprouter.Handle, tokens []string) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request,
-	ps httprouter.Params) {
+		ps httprouter.Params) {
 		// token is a required field
 		token, ok := CheckLength(true, r.FormValue("token"),
 			TokenMinMax, TokenMinMax)
@@ -348,8 +349,8 @@ func tokenProtect(h httprouter.Handle, tokens []string) httprouter.Handle {
 // if on initial (login) call api (register/login/recover)
 // Now serves as a common "success" return point after login
 func saveLogin(w http.ResponseWriter, r *http.Request,
-ps httprouter.Params, initial bool, u *User,
-ie map[string]interface{}) {
+	ps httprouter.Params, initial bool, u *User,
+	ie map[string]interface{}) {
 	// Clear out user session
 	if u.UserState == UserStateBanned {
 		formatReturn(w, r, ps, ErrorCodeUserBanned, false, nil)
@@ -362,8 +363,9 @@ ie map[string]interface{}) {
 	if initial {
 		token := jwt.New(jwtSigningMethod)
 		// Set claims for user id and expiration
-		token.Claims["user_id"] = u.ID
-		token.Claims["expire"] = time.Now().Add(jwtSigningDuration).Unix()
+		claims := token.Claims.(jwt.MapClaims)
+		claims["user_id"] = u.ID
+		claims["expire"] = time.Now().Add(jwtSigningDuration).Unix()
 		tokenString, err := token.SignedString(jwtSigningSecret)
 		if err != nil {
 			formatReturn(w, r, ps, ErrorCodeJwtError, false, nil)
@@ -375,7 +377,7 @@ ie map[string]interface{}) {
 
 	// TODO: Probably need to merge this somewhere to save one db save
 	u.LastIpAddress = getIp(r)
-	u.LastLanguage = ps[len(ps) - 2].Value
+	u.LastLanguage = ps[len(ps)-2].Value
 	// Do not fail on ip address save
 	dbConn.Save(u)
 
@@ -391,7 +393,7 @@ ie map[string]interface{}) {
 // saveAdmin is the normal return point after an admin operation
 // Future common ground for priviledged returns
 func saveAdmin(w http.ResponseWriter, r *http.Request,
-ps httprouter.Params, u *User, ie map[string]interface{}) {
+	ps httprouter.Params, u *User, ie map[string]interface{}) {
 	// TODO: Probably need to merge this somewhere to save one db save
 	u.LastIpAddress = getIp(r)
 	// Do not fail on ip address save
@@ -414,7 +416,7 @@ func getIp(r *http.Request) string {
 // logging so we don't log everything such as static files
 func logProtect(h httprouter.Handle) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request,
-	ps httprouter.Params) {
+		ps httprouter.Params) {
 		r.Body = http.MaxBytesReader(w, r.Body, maxRequestBody)
 		r.ParseMultipartForm(0)
 		reqId := fmt.Sprintf("%v", rand.Int63())
@@ -452,17 +454,18 @@ func newServerRouter() *httprouter.Router {
 
 	// --- Account ---
 	router.POST("/account/send_mobile_code", logProtect(mobileSendVerificationCodeHandler))
+	router.POST("/account/verify_mobile_code", logProtect(mobileCheckVerificationCodeHandler))
 	router.POST("/account/register", logProtect(accountRegisterHandler))
 	router.POST("/account/login", logProtect(accountLoginHandler))
-	router.POST("/account/confirm",
-		logProtect(authProtect(accountConfirmHandler)))
+	router.POST("/account/confirm", logProtect(authProtect(accountConfirmHandler)))
 	router.POST("/account/recover", logProtect(accountRecoverHandler))
 	router.POST("/account/forget", logProtect(accountForgetHandler))
-	router.POST("/account/change",
-		logProtect(authProtect(accountChangeHandler)))
+	router.POST("/account/change", logProtect(authProtect(accountChangeHandler)))
 
-	router.PUT("/account/stateupdate",
-		logProtect(authProtect(accountStateUpdate)))
+	router.PUT("/account/stateupdate", logProtect(authProtect(accountStateUpdate)))
+
+	router.PUT("/account/wxlogin", logProtect(wechatLoginHandler))
+	router.PUT("/account/wxbind", logProtect(wechatBindHandler))
 
 	// --- User ---
 	router.PUT("/user/nda", logProtect(authProtect(userNdaHandler)))
@@ -717,7 +720,7 @@ func newServerRouter() *httprouter.Router {
 				name += fname
 			} // special case "/"
 			rh := func(w http.ResponseWriter, r *http.Request,
-			ps httprouter.Params) {
+				ps httprouter.Params) {
 				// Disable directory listing if no index.html is available
 				fp := strings.Replace(ps.ByName("filepath"),
 					"/", string(filepath.Separator), -1)

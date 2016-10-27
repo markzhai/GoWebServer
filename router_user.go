@@ -8,15 +8,14 @@ import (
 	"path"
 
 	"github.com/julienschmidt/httprouter"
+	"golang.org/x/crypto/bcrypt"
 )
 
 func userNdaHandler(w http.ResponseWriter, r *http.Request,
 ps httprouter.Params, u *User) {
 	// State must be after confirmed and accred if investor
-	if (u.RoleType == RoleTypeShareholder &&
-		u.UserState < UserStateConfirmed) ||
-		(u.RoleType == RoleTypeInvestor &&
-			u.UserState < UserStateAccred) {
+	if (u.RoleType == RoleTypeShareholder && u.UserState < UserStateConfirmed) ||
+		(u.RoleType == RoleTypeInvestor && u.UserState < UserStateAccred) {
 		formatReturn(w, r, ps, ErrorCodeNdaError, true, nil)
 		return
 	}
@@ -182,29 +181,43 @@ func userKycFieldCheck(r *http.Request, u *User,
 ctForce bool, ctImmutable bool) (string, bool) {
 	// We save as many valid fields as possible
 	allof := ""
+
 	dob, of := CheckDateForm("", r, "dob")
 	if of == "" {
 		u.Dob = dob
 	} else if allof == "" {
 		allof = of
 	}
-	phoneNumber, of := CheckLengthForm("", r, "phone_number",
-		PhoneMin, PhoneMax)
+
+	phoneNumber, of := CheckLengthForm("", r, "phone_number", PhoneMin, PhoneMax)
 	if of == "" {
 		u.PhoneNumber = phoneNumber
 	} else if allof == "" {
 		allof = of
 	}
+
 	address1, of := CheckFieldForm("", r, "address1")
 	if of == "" {
 		u.Address1 = address1
 	} else if allof == "" {
 		allof = of
 	}
+
+	// optional
 	address2, of := CheckFieldForm("", r, "address2")
 	if of == "" {
 		u.Address2 = address2
-	} // address2 is optional
+	}
+	firstName, of := CheckFieldForm("", r, "first_name")
+	if of == "" {
+		u.FirstName = firstName
+	}
+	lastName, of := CheckFieldForm("", r, "last_name")
+	if of == "" {
+		u.LastName = lastName
+	}
+	u.FullName = NameConventions[u.CitizenType](firstName, lastName)
+
 	city, of := CheckFieldForm("", r, "city")
 	if of == "" {
 		u.City = city
@@ -247,6 +260,7 @@ ctForce bool, ctImmutable bool) (string, bool) {
 			allof = of
 		}
 	}
+
 	state, of := CheckFieldForm("", r, "state")
 	// Check US state strictly
 	if citizenType != CitizenTypeOther {
@@ -259,6 +273,31 @@ ctForce bool, ctImmutable bool) (string, bool) {
 		u.State = state
 	} else if allof == "" {
 		allof = of
+	}
+
+	password, of := CheckLengthForm("", r, "password", PasswordMinMax, PasswordMinMax)
+	if of == "" {
+		passwordHash, err := bcrypt.GenerateFromPassword([]byte(password),
+			bcrypt.DefaultCost)
+		// Return unknown register error here
+		if err != nil {
+			of = err.Error()
+			allof = of
+		} else {
+			u.PasswordHash = string(passwordHash)
+		}
+	} else if allof == "" {
+		allof = of
+	}
+
+	if u.CitizenType == CitizenTypeOther {
+		idCardNumber, of := CheckIdCardForm(of, r, "id_card_number")
+		if of == "" {
+			u.IDCardNumber = idCardNumber
+		} else if allof == "" {
+			//formatReturn(w, r, ps, ErrorCodeIdCardInvalid, false, nil)
+			allof = of
+		}
 	}
 
 	// Check common investor fields if we are at an investor stage

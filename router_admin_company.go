@@ -13,7 +13,7 @@ import (
 )
 
 func adminCompaniesHandler(w http.ResponseWriter, r *http.Request,
-ps httprouter.Params, u *User) {
+	ps httprouter.Params, u *User) {
 	// Both fields are optional with defaults to 0
 	pnum, _ := CheckRange(true, r.FormValue("page_number"), NumberMax)
 	psize, _ := CheckRange(true, r.FormValue("page_size"), NumberMax)
@@ -26,7 +26,7 @@ ps httprouter.Params, u *User) {
 
 	var cs []Company
 	if dbConn.Where("name ~* ?", r.FormValue("keyword")).
-		Order("id desc").Offset(int(pnum * psize)).Limit(int(psize)).
+		Order("id desc").Offset(int(pnum*psize)).Limit(int(psize)).
 		Find(&cs).Error != nil {
 		// Probably bad inputs
 		formatReturn(w, r, ps, ErrorCodeAdminPageError, true, nil)
@@ -60,7 +60,7 @@ ps httprouter.Params, u *User) {
 }
 
 func adminCompanyTagsHandler(w http.ResponseWriter, r *http.Request,
-ps httprouter.Params, u *User) {
+	ps httprouter.Params, u *User) {
 	// Both fields are optional with defaults to 0
 	pnum, _ := CheckRange(true, r.FormValue("page_number"), NumberMax)
 	psize, _ := CheckRange(true, r.FormValue("page_size"), NumberMax)
@@ -74,7 +74,7 @@ ps httprouter.Params, u *User) {
 	var ts []Tag
 	if dbConn.Where("name ~* ? or name_cn ~* ?", r.FormValue("keyword"),
 		r.FormValue("keyword")).
-		Order("id desc").Offset(int(pnum * psize)).Limit(int(psize)).
+		Order("id desc").Offset(int(pnum*psize)).Limit(int(psize)).
 		Find(&ts).Error != nil {
 		// Probably bad inputs
 		formatReturn(w, r, ps, ErrorCodeAdminPageError, true, nil)
@@ -95,7 +95,7 @@ ps httprouter.Params, u *User) {
 }
 
 func adminCompanyIdHandler(w http.ResponseWriter, r *http.Request,
-ps httprouter.Params, u *User) {
+	ps httprouter.Params, u *User) {
 	cid, err := strconv.ParseUint(ps.ByName("id"), 10, 64)
 	if err != nil {
 		formatReturn(w, r, ps, ErrorCodeCompanyUnknown, true, nil)
@@ -209,7 +209,7 @@ ps httprouter.Params, u *User) {
 }
 
 func adminCompanyTagIdHandler(w http.ResponseWriter, r *http.Request,
-ps httprouter.Params, u *User) {
+	ps httprouter.Params, u *User) {
 	tid, err := strconv.ParseUint(ps.ByName("id"), 10, 64)
 	if err != nil {
 		formatReturn(w, r, ps, ErrorCodeCompanyTagUnknown, true, nil)
@@ -229,7 +229,7 @@ ps httprouter.Params, u *User) {
 }
 
 func adminCompanyUpdateHandler(w http.ResponseWriter, r *http.Request,
-ps httprouter.Params, u *User) {
+	ps httprouter.Params, u *User) {
 	cid, err := strconv.ParseUint(ps.ByName("id"), 10, 64)
 	if err != nil {
 		formatReturn(w, r, ps, ErrorCodeCompanyUnknown, true, nil)
@@ -463,7 +463,7 @@ ps httprouter.Params, u *User) {
 }
 
 func adminCompanyAddHandler(w http.ResponseWriter, r *http.Request,
-ps httprouter.Params, u *User) {
+	ps httprouter.Params, u *User) {
 	name, of := CheckFieldForm("", r, "name")
 	yearFounded, of := CheckRangeForm(of, r, "year_founded",
 		YearMax)
@@ -606,7 +606,7 @@ ps httprouter.Params, u *User) {
 }
 
 func adminCompanyLogoUpdateHandler(w http.ResponseWriter, r *http.Request,
-ps httprouter.Params, u *User) {
+	ps httprouter.Params, u *User) {
 	cid, err := strconv.ParseUint(ps.ByName("id"), 10, 64)
 	if err != nil {
 		formatReturn(w, r, ps, ErrorCodeCompanyUnknown, true, nil)
@@ -631,7 +631,7 @@ ps httprouter.Params, u *User) {
 }
 
 func adminCompanyBgUpdateHandler(w http.ResponseWriter, r *http.Request,
-ps httprouter.Params, u *User) {
+	ps httprouter.Params, u *User) {
 	cid, err := strconv.ParseUint(ps.ByName("id"), 10, 64)
 	if err != nil {
 		formatReturn(w, r, ps, ErrorCodeCompanyUnknown, true, nil)
@@ -656,7 +656,7 @@ ps httprouter.Params, u *User) {
 }
 
 func adminCompanySlideUpdateHandler(w http.ResponseWriter, r *http.Request,
-ps httprouter.Params, u *User, lang string) {
+	ps httprouter.Params, u *User, lang string) {
 	cid, err := strconv.ParseUint(ps.ByName("id"), 10, 64)
 	if err != nil {
 		formatReturn(w, r, ps, ErrorCodeCompanyUnknown, true, nil)
@@ -689,17 +689,17 @@ ps httprouter.Params, u *User, lang string) {
 }
 
 func adminCompanySlideEnUpdateHandler(w http.ResponseWriter, r *http.Request,
-ps httprouter.Params, u *User) {
+	ps httprouter.Params, u *User) {
 	adminCompanySlideUpdateHandler(w, r, ps, u, "en")
 }
 
 func adminCompanySlideZhUpdateHandler(w http.ResponseWriter, r *http.Request,
-ps httprouter.Params, u *User) {
+	ps httprouter.Params, u *User) {
 	adminCompanySlideUpdateHandler(w, r, ps, u, "zh")
 }
 
 func adminCompanyTagUpdateHandler(w http.ResponseWriter, r *http.Request,
-ps httprouter.Params, u *User) {
+	ps httprouter.Params, u *User) {
 	tid, err := strconv.ParseUint(ps.ByName("id"), 10, 64)
 	if err != nil {
 		formatReturn(w, r, ps, ErrorCodeCompanyTagUnknown, true, nil)
@@ -730,7 +730,7 @@ ps httprouter.Params, u *User) {
 }
 
 func adminCompanyTagAddHandler(w http.ResponseWriter, r *http.Request,
-ps httprouter.Params, u *User) {
+	ps httprouter.Params, u *User) {
 	name, of := CheckFieldForm("", r, "name")
 	nameCn, of := CheckFieldForm(of, r, "name_cn")
 
@@ -759,7 +759,7 @@ ps httprouter.Params, u *User) {
 }
 
 func adminCompanyDeleteHandler(w http.ResponseWriter, r *http.Request,
-ps httprouter.Params, u *User) {
+	ps httprouter.Params, u *User) {
 	cid, err := strconv.ParseUint(ps.ByName("id"), 10, 64)
 	if err != nil {
 		formatReturn(w, r, ps, ErrorCodeCompanyUnknown, true, nil)

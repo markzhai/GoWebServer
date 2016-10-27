@@ -9,7 +9,9 @@ import (
 func wechatAddHandler(w http.ResponseWriter, r *http.Request,
 ps httprouter.Params) {
 	// All params must be present
-	wechatId, of := CheckLengthForm("", r, "wechat_id",
+	openID, of := CheckLengthForm("", r, "openid",
+		OpenIdMinMax, OpenIdMinMax)
+	unionID, of := CheckLengthForm("", r, "unionid",
 		OpenIdMinMax, OpenIdMinMax)
 	citizenType, of := CheckRangeForm(of, r, "citizen_type",
 		CitizenTypeOther)
@@ -23,14 +25,14 @@ ps httprouter.Params) {
 		return
 	}
 
-	if !dbConn.First(&Wechat{}, "wechat_id = ?", wechatId).RecordNotFound() {
+	if !dbConn.First(&Wechat{}, "union_id = ?", unionID).RecordNotFound() {
 		formatReturnJson(w, r, ps, ErrorCodeWechatExists, "", LoginNone, nil)
 		return
 	}
 
 	// Parse photo id
 	furl, fname, ftype, err := parseFileUpload(r, "photo_id", "wechat",
-		wechatId, "photo_id")
+		unionID, "photo_id")
 	if err != nil {
 		formatReturnJson(w, r, ps, ErrorCodeUploadIdError, "", LoginNone, nil)
 		return
@@ -39,7 +41,8 @@ ps httprouter.Params) {
 	// Save link in case we change storage types in the future
 	wc := Wechat{
 		WechatState:      WechatStateCreated,
-		WechatId:         wechatId,
+		OpenID:           openID,
+		UnionID:          unionID,
 		PhotoIDPic:       furl,
 		PhotoIDName:      fname,
 		PhotoIDType:      ftype,
@@ -59,7 +62,7 @@ ps httprouter.Params) {
 
 func wechatIdHandler(w http.ResponseWriter, r *http.Request,
 ps httprouter.Params) {
-	wechatId, ok := CheckLength(true, ps.ByName("id"),
+	unionId, ok := CheckLength(true, ps.ByName("id"),
 		OpenIdMinMax, OpenIdMinMax)
 
 	if !ok {
@@ -69,7 +72,7 @@ ps httprouter.Params) {
 
 	// Check if exists
 	var wc Wechat
-	if dbConn.First(&wc, "wechat_id = ?", wechatId).RecordNotFound() {
+	if dbConn.First(&wc, "union_id = ?", unionId).RecordNotFound() {
 		formatReturnJson(w, r, ps, ErrorCodeWechatError, "", LoginNone, nil)
 		return
 	}

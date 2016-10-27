@@ -11,6 +11,7 @@ const (
 	ErrorFmtCodeBadArgument
 	ErrorCodeEmailUnknown
 	ErrorCodePhoneUnknown
+	ErrorCodeIdCardInvalid
 	ErrorCodeBadPassword
 	ErrorCodePhoneCodeError
 	ErrorCodeEmailTokenInvalid
@@ -74,6 +75,7 @@ const (
 	ErrorCodeTokenError
 	ErrorCodeWechatExists
 	ErrorCodeWechatError
+	ErrorCodeWechatBinded
 	ErrorCodeAdminError
 	ErrorCodeAdminUserStateError
 	ErrorCodeAdminPageError
@@ -95,6 +97,7 @@ var ErrorCodes = map[string][]string{
 		"Argument field %v is invalid",
 		"Email has not been registered",
 		"Phone number has not been registered",
+		"Id card number is invalid",
 		"Wrong password",
 		"Phone verification code is error",
 		"Invalid email activation token",
@@ -158,6 +161,7 @@ var ErrorCodes = map[string][]string{
 		"Access token is invalid",
 		"Wechat account is already registered",
 		"Wechat account is invalid",
+		"Wechat account is binded",
 		"Admin operation error",
 		"User state modification is invalid for citizen type",
 		"Paging arguments are invalid",
@@ -176,6 +180,7 @@ var ErrorCodes = map[string][]string{
 		"参数 %v 格式错误",
 		"邮箱未被注册",
 		"手机号未被注册",
+		"身份证号码不合法",
 		"密码错误",
 		"手机验证码错误",
 		"邮箱确认码无效",
@@ -239,6 +244,7 @@ var ErrorCodes = map[string][]string{
 		"访问密钥无效",
 		"微信帐号已经被注册",
 		"微信帐号不合法",
+		"微信账号已经被绑定",
 		"管理员操作错误",
 		"此用户状态修改不符合用户国籍",
 		"分页参数不合法",

@@ -9,7 +9,7 @@ import (
 )
 
 func companiesHandler(w http.ResponseWriter, r *http.Request,
-ps httprouter.Params) {
+	ps httprouter.Params) {
 	// Must start with at least a keyword
 	kw, ok := CheckField(true, r.FormValue("keyword"))
 	if !ok {
@@ -56,7 +56,7 @@ ps httprouter.Params) {
 }
 
 func companyIdHandler(w http.ResponseWriter, r *http.Request,
-ps httprouter.Params, u *User) {
+	ps httprouter.Params, u *User) {
 	// Make sure we don't read more information than user could
 	// Special debug flag does it anyway
 	if u.UserState < UserStateActive {
@@ -104,7 +104,7 @@ ps httprouter.Params, u *User) {
 	sort.Sort(CompanyUpdateSort(updates))
 
 	// Process language-specific returns
-	reqLang := ps[len(ps) - 2].Value
+	reqLang := ps[len(ps)-2].Value
 	var desc, tagss string
 	if reqLang == "zh-CN" {
 		desc = c.DescriptionCn

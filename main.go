@@ -41,7 +41,7 @@ func main() {
 		// Setup server logging file, exit if failed
 		var err error
 		sslf, err = os.OpenFile(logFileName,
-			os.O_APPEND | os.O_CREATE | os.O_RDWR, 0666)
+			os.O_APPEND|os.O_CREATE|os.O_RDWR, 0666)
 		if err != nil {
 			log.Fatalln("Error opening server log file:", err)
 		}
@@ -61,7 +61,7 @@ func main() {
 		// Setup db logging file, exit if failed
 		var err error
 		sdlf, err = os.OpenFile(dbLogFileName,
-			os.O_APPEND | os.O_CREATE | os.O_RDWR, 0666)
+			os.O_APPEND|os.O_CREATE|os.O_RDWR, 0666)
 		if err != nil {
 			log.Fatalln("Error opening database log file:", err)
 		}
@@ -78,10 +78,10 @@ func main() {
 		for {
 			select {
 			case event := <-watcher.Events:
-				if event.Op & fsnotify.Create == fsnotify.Create ||
-					event.Op & fsnotify.Remove == fsnotify.Remove ||
-					event.Op & fsnotify.Rename == fsnotify.Rename ||
-					event.Op & fsnotify.Chmod == fsnotify.Chmod {
+				if event.Op&fsnotify.Create == fsnotify.Create ||
+					event.Op&fsnotify.Remove == fsnotify.Remove ||
+					event.Op&fsnotify.Rename == fsnotify.Rename ||
+					event.Op&fsnotify.Chmod == fsnotify.Chmod {
 					if event.Name == logFileName {
 						ssl()
 						defer sslf.Close()
@@ -193,11 +193,11 @@ func main() {
 					if s == "0" {
 						return 0.0
 					}
-					fl, err := strconv.ParseFloat(s[1:len(s) - 1], 64)
+					fl, err := strconv.ParseFloat(s[1:len(s)-1], 64)
 					if err != nil {
 						return 0.0
 					}
-					if s[len(s) - 1] == 'M' {
+					if s[len(s)-1] == 'M' {
 						fl /= 1000.0
 					}
 					return fl
@@ -264,7 +264,7 @@ func main() {
 					}
 					fi, err := strconv.ParseUint(rec[0], 10, 64)
 					if err != nil {
-						dbLog.Fatalf("FAILED TO READ A COMPANY " +
+						dbLog.Fatalf("FAILED TO READ A COMPANY "+
 							"EXECUTIVE ID %v\n", i)
 					}
 					if fi > idx {
@@ -309,13 +309,13 @@ func main() {
 					}
 					fi, err := strconv.ParseUint(rec[0], 10, 64)
 					if err != nil {
-						dbLog.Fatalf("FAILED TO READ A COMPANY " +
+						dbLog.Fatalf("FAILED TO READ A COMPANY "+
 							"UPDATE ID %v\n", i)
 					}
 					if fi > idx {
 						updates = append(updates, cus)
 						// Fill in empties in between
-						for j := idx; j < fi - 1; j++ {
+						for j := idx; j < fi-1; j++ {
 							updates = append(updates, []CompanyUpdate{})
 						}
 						idx = fi

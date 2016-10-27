@@ -11,7 +11,7 @@ import (
 )
 
 func adminUsersHandler(w http.ResponseWriter, r *http.Request,
-ps httprouter.Params, u *User) {
+	ps httprouter.Params, u *User) {
 	// Both fields are optional with defaults to 0
 	pnum, _ := CheckRange(true, r.FormValue("page_number"), NumberMax)
 	psize, _ := CheckRange(true, r.FormValue("page_size"), NumberMax)
@@ -24,7 +24,7 @@ ps httprouter.Params, u *User) {
 
 	var us []User
 	if dbConn.Where("full_name ~* ?", r.FormValue("keyword")).
-		Order("id desc").Offset(int(pnum * psize)).Limit(int(psize)).
+		Order("id desc").Offset(int(pnum*psize)).Limit(int(psize)).
 		Find(&us).Error != nil {
 		// Probably bad inputs
 		formatReturn(w, r, ps, ErrorCodeAdminPageError, true, nil)
@@ -40,7 +40,7 @@ ps httprouter.Params, u *User) {
 			"email":        user.Email,
 			"email_token":  user.EmailToken,
 			"role_type":    user.RoleType,
-			"phone_number":    user.PhoneNumber,
+			"phone_number": user.PhoneNumber,
 			"user_state":   user.UserState,
 			"citizen_type": user.CitizenType,
 			"created":      user.CreatedAt.Unix(),
@@ -52,7 +52,7 @@ ps httprouter.Params, u *User) {
 }
 
 func adminUserIdHandler(w http.ResponseWriter, r *http.Request,
-ps httprouter.Params, u *User) {
+	ps httprouter.Params, u *User) {
 	uid, err := strconv.ParseUint(ps.ByName("id"), 10, 64)
 	if err != nil {
 		formatReturn(w, r, ps, ErrorCodeUserUnknown, true, nil)
@@ -111,7 +111,7 @@ ps httprouter.Params, u *User) {
 		"invest_exp_total":            user.InvestExpTotal,
 		"invest_real_estate_portion":  user.InvestRealEstatePortion,
 		"invest_convert_cash_ninety_days_portion": user.
-		InvestConvertCashNinetyDaysPortion,
+			InvestConvertCashNinetyDaysPortion,
 		"invest_alternative_portion":   user.InvestAlternativePortion,
 		"invest_private_company":       user.InvestPrivateCompany,
 		"invest_portfolio_horizon":     user.InvestPortfolioHorizon,
@@ -124,7 +124,7 @@ ps httprouter.Params, u *User) {
 }
 
 func adminUserUpdateHandler(w http.ResponseWriter, r *http.Request,
-ps httprouter.Params, u *User) {
+	ps httprouter.Params, u *User) {
 	uid, err := strconv.ParseUint(ps.ByName("id"), 10, 64)
 	if err != nil {
 		formatReturn(w, r, ps, ErrorCodeUserUnknown, true, nil)
@@ -233,18 +233,18 @@ ps httprouter.Params, u *User) {
 		if user.RoleType == RoleTypeInvestor {
 			subject =
 				EmailTexts[user.
-				LastLanguage][EmailTextSubjectInvestorApproved]
+					LastLanguage][EmailTextSubjectInvestorApproved]
 			body = fmt.Sprintf(
 				EmailTexts[user.
-				LastLanguage][EmailTextBodyInvestorApproved],
+					LastLanguage][EmailTextBodyInvestorApproved],
 				user.FullName, fmt.Sprintf(emailInvestorLink, serverDomain))
 		} else if user.RoleType == RoleTypeShareholder {
 			subject =
 				EmailTexts[user.
-				LastLanguage][EmailTextSubjectShareholderApproved]
+					LastLanguage][EmailTextSubjectShareholderApproved]
 			body = fmt.Sprintf(
 				EmailTexts[user.
-				LastLanguage][EmailTextBodyShareholderApproved],
+					LastLanguage][EmailTextBodyShareholderApproved],
 				user.FullName, fmt.Sprintf(emailShareholderLink, serverDomain))
 		}
 
@@ -260,7 +260,7 @@ ps httprouter.Params, u *User) {
 }
 
 func adminUserPhotoIdHandler(w http.ResponseWriter, r *http.Request,
-ps httprouter.Params, u *User) {
+	ps httprouter.Params, u *User) {
 	uid, err := strconv.ParseUint(ps.ByName("id"), 10, 64)
 	if err != nil {
 		return
@@ -277,7 +277,7 @@ ps httprouter.Params, u *User) {
 }
 
 func adminUserPhotoIdTokenHandler(w http.ResponseWriter, r *http.Request,
-ps httprouter.Params) {
+	ps httprouter.Params) {
 	token, ok := CheckLength(true, ps.ByName("token"),
 		TokenMinMax, TokenMinMax)
 	if !ok {
@@ -295,7 +295,7 @@ ps httprouter.Params) {
 }
 
 func adminUserPhotoIdUploadHandler(w http.ResponseWriter, r *http.Request,
-ps httprouter.Params, u *User) {
+	ps httprouter.Params, u *User) {
 	uid, err := strconv.ParseUint(ps.ByName("id"), 10, 64)
 	if err != nil {
 		formatReturn(w, r, ps, ErrorCodeUserUnknown, true, nil)
@@ -334,7 +334,7 @@ ps httprouter.Params, u *User) {
 }
 
 func adminUserDeleteHandler(w http.ResponseWriter, r *http.Request,
-ps httprouter.Params, u *User) {
+	ps httprouter.Params, u *User) {
 	uid, err := strconv.ParseUint(ps.ByName("id"), 10, 64)
 	if err != nil {
 		formatReturn(w, r, ps, ErrorCodeUserUnknown, true, nil)

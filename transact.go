@@ -32,16 +32,16 @@ type Transact struct {
 }
 
 var (
-	TransactErrorUser = errors.New("Bad user data")
-	TransactErrorArgs = errors.New("Bad arguments")
-	TransactErrorRequest = errors.New("Request error")
-	TransactErrorNetwork = errors.New("Network error")
-	TransactErrorAPI = errors.New("API call error")
-	TransactErrorResponse = errors.New("Response parsing error")
-	TransactErrorFail = errors.New("Result error")
-	TransactErrorCall = errors.New("Call error")
+	TransactErrorUser       = errors.New("Bad user data")
+	TransactErrorArgs       = errors.New("Bad arguments")
+	TransactErrorRequest    = errors.New("Request error")
+	TransactErrorNetwork    = errors.New("Network error")
+	TransactErrorAPI        = errors.New("API call error")
+	TransactErrorResponse   = errors.New("Response parsing error")
+	TransactErrorFail       = errors.New("Result error")
+	TransactErrorCall       = errors.New("Call error")
 	TransactErrorKYCExpired = errors.New("KYC time expired")
-	TransactErrorKYCFailed = errors.New("KYC failed multiple times")
+	TransactErrorKYCFailed  = errors.New("KYC failed multiple times")
 )
 
 var DummyUser = User{
@@ -67,9 +67,9 @@ func init() {
 /* Private helpers */
 
 var (
-	kycAttempts uint64 = 3
-	kycExpiring = 10 * time.Minute
-	transactTimeout = 10 * time.Second
+	kycAttempts     uint64 = 3
+	kycExpiring            = 10 * time.Minute
+	transactTimeout        = 10 * time.Second
 )
 
 // log checks to see if we should log to server or just stdout
@@ -88,7 +88,7 @@ func (t *Transact) log(format string, a ...interface{}) {
 // request takes a method, call and params to construct a call to TransactAPI
 // and parses response and returns response body for parsing
 func (t *Transact) request(method, call string,
-params map[string]string) (map[string]interface{}, error) {
+	params map[string]string) (map[string]interface{}, error) {
 	form := url.Values{}
 	// Set common fields
 	form.Set("clientID", t.clientID)
@@ -151,7 +151,7 @@ params map[string]string) (map[string]interface{}, error) {
 
 // requestRetry is a wrapper around request with 3 network retries
 func (t *Transact) requestRetry(method, call string,
-params map[string]string) (map[string]interface{}, error) {
+	params map[string]string) (map[string]interface{}, error) {
 	for i := 0; i < 3; i++ {
 		data, err := t.request(method, call, params)
 		if err != TransactErrorNetwork {
@@ -163,13 +163,13 @@ params map[string]string) (map[string]interface{}, error) {
 
 // post is a wrapper for the POST request
 func (t *Transact) post(call string,
-params map[string]string) (map[string]interface{}, error) {
+	params map[string]string) (map[string]interface{}, error) {
 	return t.requestRetry("POST", call, params)
 }
 
 // put is a wrapper for the PUT request
 func (t *Transact) put(call string,
-params map[string]string) (map[string]interface{}, error) {
+	params map[string]string) (map[string]interface{}, error) {
 	return t.requestRetry("PUT", call, params)
 }
 
@@ -288,7 +288,7 @@ func (t *Transact) DeleteInvestor(u *User) error {
 // On success, u *User is updated accordingly
 // Returns a list of questions to be answered
 func (t *Transact) CreateInvestorAccount(u *User) ([]map[string]interface{},
-error) {
+	error) {
 	if u.TransactApiInvestorID == 0 {
 		return nil, TransactErrorUser
 	}

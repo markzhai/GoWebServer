@@ -10,7 +10,7 @@ import (
 // testDocusign is a private helper handling the generic interactive
 // docusign signing and downloading process
 func testDocusign(t *testing.T, template string,
-args map[string]interface{}, dur time.Duration, pdf string) {
+	args map[string]interface{}, dur time.Duration, pdf string) {
 	// Setup api
 	mxds := Docusign{docusignUrl, docusignUsername, docusignPassword,
 		docusignAccountId, docusignIntegratorKey, false}
@@ -98,7 +98,7 @@ func TestDocusignBuyDePpm(t *testing.T) {
 			"last_valuation":      "3.00B",
 			"shares_type":         "Common Shares",
 			"last_valuation_date": "3/15/2016",
-		}, 2 * time.Minute, "./test_enc_4.pdf")
+		}, 2*time.Minute, "./test_enc_4.pdf")
 }
 
 func TestDocusignBuyDeOperatingAgreement(t *testing.T) {
@@ -109,7 +109,7 @@ func TestDocusignBuyDeOperatingAgreement(t *testing.T) {
 			"company":       "Palantir",
 			"company_state": "California",
 			"shares_type":   "Common Shares",
-		}, 2 * time.Minute, "./test_enc_5.pdf")
+		}, 2*time.Minute, "./test_enc_5.pdf")
 }
 
 func TestDocusignBuyDeSubscriptionAgreement(t *testing.T) {
@@ -124,5 +124,5 @@ func TestDocusignBuyDeSubscriptionAgreement(t *testing.T) {
 			"address":          "Some street",
 			"phone_number":     "12333333333",
 			"email":            "zhaiyifan56@gmail.com",
-		}, 3 * time.Minute, "./test_enc_6.pdf")
+		}, 3*time.Minute, "./test_enc_6.pdf")
 }

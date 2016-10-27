@@ -13,7 +13,7 @@ import (
 )
 
 func adminDealsHandler(w http.ResponseWriter, r *http.Request,
-ps httprouter.Params, u *User) {
+	ps httprouter.Params, u *User) {
 	// Both fields are optional with defaults to 0
 	pnum, _ := CheckRange(true, r.FormValue("page_number"), NumberMax)
 	psize, _ := CheckRange(true, r.FormValue("page_size"), NumberMax)
@@ -27,12 +27,12 @@ ps httprouter.Params, u *User) {
 	var ds []Deal
 	kw := r.FormValue("keyword")
 	// Fake a join with an existing company for user submitted deals
-	if dbConn.Joins("join companies on (companies.id = deals.company_id " +
-		"and companies.name ~* ?) or (companies.id = 1 " +
+	if dbConn.Joins("join companies on (companies.id = deals.company_id "+
+		"and companies.name ~* ?) or (companies.id = 1 "+
 		"and deals.deal_state = ? and deals.name ~* ?)",
 		kw, DealStateUserSubmitted, kw).
 		Order("end_date desc, start_date desc").
-		Offset(int(pnum * psize)).Limit(int(psize)).Find(&ds).Error != nil {
+		Offset(int(pnum*psize)).Limit(int(psize)).Find(&ds).Error != nil {
 		// Probably bad inputs
 		formatReturn(w, r, ps, ErrorCodeAdminPageError, true, nil)
 		return
@@ -75,7 +75,7 @@ ps httprouter.Params, u *User) {
 }
 
 func adminDealIdHandler(w http.ResponseWriter, r *http.Request,
-ps httprouter.Params, u *User) {
+	ps httprouter.Params, u *User) {
 	did, err := strconv.ParseUint(ps.ByName("id"), 10, 64)
 	if err != nil {
 		formatReturn(w, r, ps, ErrorCodeDealUnknown, true, nil)
@@ -117,7 +117,7 @@ ps httprouter.Params, u *User) {
 }
 
 func adminDealUpdateHandler(w http.ResponseWriter, r *http.Request,
-ps httprouter.Params, u *User) {
+	ps httprouter.Params, u *User) {
 	did, err := strconv.ParseUint(ps.ByName("id"), 10, 64)
 	if err != nil {
 		formatReturn(w, r, ps, ErrorCodeDealUnknown, true, nil)
@@ -201,7 +201,7 @@ ps httprouter.Params, u *User) {
 }
 
 func adminDealAddHandler(w http.ResponseWriter, r *http.Request,
-ps httprouter.Params, u *User) {
+	ps httprouter.Params, u *User) {
 	// All fields must be present
 	cid, of := CheckRangeForm("", r, "company_id", NumberMax)
 	dealState, of := CheckRangeForm(of, r, "deal_state",
@@ -275,7 +275,7 @@ ps httprouter.Params, u *User) {
 }
 
 func adminDealDeleteHandler(w http.ResponseWriter, r *http.Request,
-ps httprouter.Params, u *User) {
+	ps httprouter.Params, u *User) {
 	did, err := strconv.ParseUint(ps.ByName("id"), 10, 64)
 	if err != nil {
 		formatReturn(w, r, ps, ErrorCodeDealUnknown, true, nil)
@@ -292,7 +292,7 @@ ps httprouter.Params, u *User) {
 }
 
 func adminDealSellsHandler(w http.ResponseWriter, r *http.Request,
-ps httprouter.Params, u *User) {
+	ps httprouter.Params, u *User) {
 	did, err := strconv.ParseUint(ps.ByName("id"), 10, 64)
 	if err != nil {
 		formatReturn(w, r, ps, ErrorCodeDealUnknown, true, nil)
@@ -310,9 +310,9 @@ ps httprouter.Params, u *User) {
 	}
 
 	var dshs []DealShareholder
-	if dbConn.Joins("join users on users.id = deal_shareholders.user_id " +
+	if dbConn.Joins("join users on users.id = deal_shareholders.user_id "+
 		"and users.full_name ~* ?", r.FormValue("keyword")).
-		Offset(int(pnum * psize)).Limit(int(psize)).
+		Offset(int(pnum*psize)).Limit(int(psize)).
 		Find(&dshs, "deal_id = ?", did).Error != nil {
 		// Probably bad inputs
 		formatReturn(w, r, ps, ErrorCodeAdminPageError, true, nil)
@@ -339,7 +339,7 @@ ps httprouter.Params, u *User) {
 }
 
 func adminDealSellHandler(w http.ResponseWriter, r *http.Request,
-ps httprouter.Params, u *User) {
+	ps httprouter.Params, u *User) {
 	did, err := strconv.ParseUint(ps.ByName("id"), 10, 64)
 	if err != nil {
 		formatReturn(w, r, ps, ErrorCodeDealUnknown, true, nil)
@@ -375,7 +375,7 @@ ps httprouter.Params, u *User) {
 		pifc := path.Join(dataDir, "deal", fmt.Sprintf("%v", deal.ID),
 			fmt.Sprintf("%v", dsh.UserID), "sell_engagement_letter")
 		if _, err := os.Stat(pifc); err == nil {
-			b := make([]byte, TokenMinMax / 2)
+			b := make([]byte, TokenMinMax/2)
 			crand.Read(b)
 			dsh.EngagementLetterToken = fmt.Sprintf("%x", b)
 			// Ignore saving problems
@@ -495,7 +495,7 @@ ps httprouter.Params, u *User) {
 // adminDealSellGetOffer checks a specific file related to selling
 // and returns the offer or nil on error
 func adminDealSellGetOffer(w http.ResponseWriter,
-r *http.Request, ps httprouter.Params) *Offer {
+	r *http.Request, ps httprouter.Params) *Offer {
 	did, err := strconv.ParseUint(ps.ByName("id"), 10, 64)
 	if err != nil {
 		return nil
@@ -541,7 +541,7 @@ r *http.Request, ps httprouter.Params) *Offer {
 }
 
 func adminDealSellShareCertificateHandler(w http.ResponseWriter,
-r *http.Request, ps httprouter.Params, u *User) {
+	r *http.Request, ps httprouter.Params, u *User) {
 	o := adminDealSellGetOffer(w, r, ps)
 	if o != nil {
 		pifc := path.Join(dataDir, "deal", fmt.Sprintf("%v", o.DealID),
@@ -553,12 +553,12 @@ r *http.Request, ps httprouter.Params, u *User) {
 
 // Although different domains, they check identical params
 func adminDealSellShareCertificateTokenHandler(w http.ResponseWriter,
-r *http.Request, ps httprouter.Params) {
+	r *http.Request, ps httprouter.Params) {
 	dealSellShareCertificateTokenHandler(w, r, ps)
 }
 
 func adminDealSellCompanyByLawsHandler(w http.ResponseWriter,
-r *http.Request, ps httprouter.Params, u *User) {
+	r *http.Request, ps httprouter.Params, u *User) {
 	o := adminDealSellGetOffer(w, r, ps)
 	if o != nil {
 		pifc := path.Join(dataDir, "deal", fmt.Sprintf("%v", o.DealID),
@@ -570,12 +570,12 @@ r *http.Request, ps httprouter.Params, u *User) {
 
 // Although different domains, they check identical params
 func adminDealSellCompanyByLawsTokenHandler(w http.ResponseWriter,
-r *http.Request, ps httprouter.Params) {
+	r *http.Request, ps httprouter.Params) {
 	dealSellCompanyByLawsTokenHandler(w, r, ps)
 }
 
 func adminDealSellShareholderAgreementHandler(w http.ResponseWriter,
-r *http.Request, ps httprouter.Params, u *User) {
+	r *http.Request, ps httprouter.Params, u *User) {
 	o := adminDealSellGetOffer(w, r, ps)
 	if o != nil {
 		pifc := path.Join(dataDir, "deal", fmt.Sprintf("%v", o.DealID),
@@ -587,12 +587,12 @@ r *http.Request, ps httprouter.Params, u *User) {
 
 // Although different domains, they check identical params
 func adminDealSellShareholderAgreementTokenHandler(w http.ResponseWriter,
-r *http.Request, ps httprouter.Params) {
+	r *http.Request, ps httprouter.Params) {
 	dealSellShareholderAgreementTokenHandler(w, r, ps)
 }
 
 func adminDealSellStockOptionPlanHandler(w http.ResponseWriter,
-r *http.Request, ps httprouter.Params, u *User) {
+	r *http.Request, ps httprouter.Params, u *User) {
 	o := adminDealSellGetOffer(w, r, ps)
 	if o != nil {
 		pifc := path.Join(dataDir, "deal", fmt.Sprintf("%v", o.DealID),
@@ -604,7 +604,7 @@ r *http.Request, ps httprouter.Params, u *User) {
 
 // Although different domains, they check identical params
 func adminDealSellStockOptionPlanTokenHandler(w http.ResponseWriter,
-r *http.Request, ps httprouter.Params) {
+	r *http.Request, ps httprouter.Params) {
 	dealSellStockOptionPlanTokenHandler(w, r, ps)
 }
 
@@ -612,7 +612,7 @@ r *http.Request, ps httprouter.Params) {
 // if available during the seller stage
 // "name" is the document name saved an
 func adminDealSellDocumentDownloadHandler(w http.ResponseWriter,
-r *http.Request, ps httprouter.Params, name string) {
+	r *http.Request, ps httprouter.Params, name string) {
 	did, err := strconv.ParseUint(ps.ByName("id"), 10, 64)
 	if err != nil {
 		return
@@ -645,18 +645,18 @@ r *http.Request, ps httprouter.Params, name string) {
 }
 
 func adminDealSellEngagementLetterHandler(w http.ResponseWriter,
-r *http.Request, ps httprouter.Params, u *User) {
+	r *http.Request, ps httprouter.Params, u *User) {
 	adminDealSellDocumentDownloadHandler(w, r, ps, "sell_engagement_letter")
 }
 
 // Although different domains, they check identical params
 func adminDealSellEngagementLetterTokenHandler(w http.ResponseWriter,
-r *http.Request, ps httprouter.Params) {
+	r *http.Request, ps httprouter.Params) {
 	dealSellEngagementLetterTokenHandler(w, r, ps)
 }
 
 func adminDealSellUpdateHandler(w http.ResponseWriter, r *http.Request,
-ps httprouter.Params, u *User) {
+	ps httprouter.Params, u *User) {
 	did, err := strconv.ParseUint(ps.ByName("id"), 10, 64)
 	if err != nil {
 		formatReturn(w, r, ps, ErrorCodeDealUnknown, true, nil)
@@ -973,7 +973,7 @@ ps httprouter.Params, u *User) {
 }
 
 func adminDealSellDeleteHandler(w http.ResponseWriter, r *http.Request,
-ps httprouter.Params, u *User) {
+	ps httprouter.Params, u *User) {
 	did, err := strconv.ParseUint(ps.ByName("id"), 10, 64)
 	if err != nil {
 		formatReturn(w, r, ps, ErrorCodeDealUnknown, true, nil)
@@ -1020,7 +1020,7 @@ ps httprouter.Params, u *User) {
 }
 
 func adminDealBuysHandler(w http.ResponseWriter, r *http.Request,
-ps httprouter.Params, u *User) {
+	ps httprouter.Params, u *User) {
 	did, err := strconv.ParseUint(ps.ByName("id"), 10, 64)
 	if err != nil {
 		formatReturn(w, r, ps, ErrorCodeDealUnknown, true, nil)
@@ -1038,9 +1038,9 @@ ps httprouter.Params, u *User) {
 	}
 
 	var dis []DealInvestor
-	if dbConn.Joins("join users on users.id = deal_investors.user_id " +
+	if dbConn.Joins("join users on users.id = deal_investors.user_id "+
 		"and users.full_name ~* ?", r.FormValue("keyword")).
-		Offset(int(pnum * psize)).Limit(int(psize)).
+		Offset(int(pnum*psize)).Limit(int(psize)).
 		Find(&dis, "deal_id = ?", did).Error != nil {
 		// Probably bad inputs
 		formatReturn(w, r, ps, ErrorCodeAdminPageError, true, nil)
@@ -1067,7 +1067,7 @@ ps httprouter.Params, u *User) {
 }
 
 func adminDealBuyHandler(w http.ResponseWriter, r *http.Request,
-ps httprouter.Params, u *User) {
+	ps httprouter.Params, u *User) {
 	did, err := strconv.ParseUint(ps.ByName("id"), 10, 64)
 	if err != nil {
 		formatReturn(w, r, ps, ErrorCodeDealUnknown, true, nil)
@@ -1104,7 +1104,7 @@ ps httprouter.Params, u *User) {
 		pifc := path.Join(dataDir, "deal", fmt.Sprintf("%v", deal.ID),
 			fmt.Sprintf("%v", di.UserID), "buy_engagement_letter")
 		if _, err := os.Stat(pifc); err == nil {
-			b := make([]byte, TokenMinMax / 2)
+			b := make([]byte, TokenMinMax/2)
 			crand.Read(b)
 			di.EngagementLetterToken = fmt.Sprintf("%x", b)
 			gened = true
@@ -1114,7 +1114,7 @@ ps httprouter.Params, u *User) {
 		pifc := path.Join(dataDir, "deal", fmt.Sprintf("%v", deal.ID),
 			fmt.Sprintf("%v", di.UserID), "summary_of_terms")
 		if _, err := os.Stat(pifc); err == nil {
-			b := make([]byte, TokenMinMax / 2)
+			b := make([]byte, TokenMinMax/2)
 			crand.Read(b)
 			di.SummaryOfTermsToken = fmt.Sprintf("%x", b)
 			gened = true
@@ -1124,7 +1124,7 @@ ps httprouter.Params, u *User) {
 		pifc := path.Join(dataDir, "deal", fmt.Sprintf("%v", deal.ID),
 			fmt.Sprintf("%v", di.UserID), "de_ppm")
 		if _, err := os.Stat(pifc); err == nil {
-			b := make([]byte, TokenMinMax / 2)
+			b := make([]byte, TokenMinMax/2)
 			crand.Read(b)
 			di.DePpmToken = fmt.Sprintf("%x", b)
 			gened = true
@@ -1134,7 +1134,7 @@ ps httprouter.Params, u *User) {
 		pifc := path.Join(dataDir, "deal", fmt.Sprintf("%v", deal.ID),
 			fmt.Sprintf("%v", di.UserID), "de_operating_agreement")
 		if _, err := os.Stat(pifc); err == nil {
-			b := make([]byte, TokenMinMax / 2)
+			b := make([]byte, TokenMinMax/2)
 			crand.Read(b)
 			di.DeOperatingAgreementToken = fmt.Sprintf("%x", b)
 			gened = true
@@ -1144,7 +1144,7 @@ ps httprouter.Params, u *User) {
 		pifc := path.Join(dataDir, "deal", fmt.Sprintf("%v", deal.ID),
 			fmt.Sprintf("%v", di.UserID), "de_subscription_agreement")
 		if _, err := os.Stat(pifc); err == nil {
-			b := make([]byte, TokenMinMax / 2)
+			b := make([]byte, TokenMinMax/2)
 			crand.Read(b)
 			di.DeSubscriptionAgreementToken = fmt.Sprintf("%x", b)
 			gened = true
@@ -1184,7 +1184,7 @@ ps httprouter.Params, u *User) {
 // if available during the buyer stage
 // "name" is the document name saved an
 func adminDealBuyDocumentDownloadHandler(w http.ResponseWriter,
-r *http.Request, ps httprouter.Params, name string) {
+	r *http.Request, ps httprouter.Params, name string) {
 	did, err := strconv.ParseUint(ps.ByName("id"), 10, 64)
 	if err != nil {
 		return
@@ -1217,62 +1217,62 @@ r *http.Request, ps httprouter.Params, name string) {
 }
 
 func adminDealBuyEngagementLetterHandler(w http.ResponseWriter,
-r *http.Request, ps httprouter.Params, u *User) {
+	r *http.Request, ps httprouter.Params, u *User) {
 	adminDealBuyDocumentDownloadHandler(w, r, ps, "buy_engagement_letter")
 }
 
 // Although different domains, they check identical params
 func adminDealBuyEngagementLetterTokenHandler(w http.ResponseWriter,
-r *http.Request, ps httprouter.Params) {
+	r *http.Request, ps httprouter.Params) {
 	dealBuyEngagementLetterTokenHandler(w, r, ps)
 }
 
 func adminDealBuySummaryTermsHandler(w http.ResponseWriter,
-r *http.Request, ps httprouter.Params, u *User) {
+	r *http.Request, ps httprouter.Params, u *User) {
 	adminDealBuyDocumentDownloadHandler(w, r, ps, "summary_of_terms")
 }
 
 // Although different domains, they check identical params
 func adminDealBuySummaryTermsTokenHandler(w http.ResponseWriter,
-r *http.Request, ps httprouter.Params) {
+	r *http.Request, ps httprouter.Params) {
 	dealBuySummaryTermsTokenHandler(w, r, ps)
 }
 
 func adminDealBuyDePpmHandler(w http.ResponseWriter, r *http.Request,
-ps httprouter.Params, u *User) {
+	ps httprouter.Params, u *User) {
 	adminDealBuyDocumentDownloadHandler(w, r, ps, "de_ppm")
 }
 
 // Although different domains, they check identical params
 func adminDealBuyDePpmTokenHandler(w http.ResponseWriter,
-r *http.Request, ps httprouter.Params) {
+	r *http.Request, ps httprouter.Params) {
 	dealBuyDePpmTokenHandler(w, r, ps)
 }
 
 func adminDealBuyDeOperatingHandler(w http.ResponseWriter,
-r *http.Request, ps httprouter.Params, u *User) {
+	r *http.Request, ps httprouter.Params, u *User) {
 	adminDealBuyDocumentDownloadHandler(w, r, ps, "de_operating_agreement")
 }
 
 // Although different domains, they check identical params
 func adminDealBuyDeOperatingTokenHandler(w http.ResponseWriter,
-r *http.Request, ps httprouter.Params) {
+	r *http.Request, ps httprouter.Params) {
 	dealBuyDeOperatingTokenHandler(w, r, ps)
 }
 
 func adminDealBuyDeSubscriptionHandler(w http.ResponseWriter,
-r *http.Request, ps httprouter.Params, u *User) {
+	r *http.Request, ps httprouter.Params, u *User) {
 	adminDealBuyDocumentDownloadHandler(w, r, ps, "de_subscription_agreement")
 }
 
 // Although different domains, they check identical params
 func adminDealBuyDeSubscriptionTokenHandler(w http.ResponseWriter,
-r *http.Request, ps httprouter.Params) {
+	r *http.Request, ps httprouter.Params) {
 	dealBuyDeSubscriptionTokenHandler(w, r, ps)
 }
 
 func adminDealBuyUpdateHandler(w http.ResponseWriter, r *http.Request,
-ps httprouter.Params, u *User) {
+	ps httprouter.Params, u *User) {
 	did, err := strconv.ParseUint(ps.ByName("id"), 10, 64)
 	if err != nil {
 		formatReturn(w, r, ps, ErrorCodeDealUnknown, true, nil)
@@ -1338,7 +1338,7 @@ ps httprouter.Params, u *User) {
 		author := EmailTexts[user.LastLanguage][EmailTextName]
 		subject :=
 			EmailTexts[user.
-			LastLanguage][EmailTextSubjectWireTransferAccount]
+				LastLanguage][EmailTextSubjectWireTransferAccount]
 		var c Company
 		var name string
 		if dbConn.Model(&deal).Related(&c).Error != nil {
@@ -1348,7 +1348,7 @@ ps httprouter.Params, u *User) {
 		}
 		body := fmt.Sprintf(
 			EmailTexts[user.
-			LastLanguage][EmailTextBodyWireTransferAccount],
+				LastLanguage][EmailTextBodyWireTransferAccount],
 			user.FullName, name, formatRoman(deal.FundNum))
 		go sendMail(author, user.Email, user.FullName, subject, body)
 	}
@@ -1441,7 +1441,7 @@ ps httprouter.Params, u *User) {
 }
 
 func adminDealBuyDeleteHandler(w http.ResponseWriter, r *http.Request,
-ps httprouter.Params, u *User) {
+	ps httprouter.Params, u *User) {
 	did, err := strconv.ParseUint(ps.ByName("id"), 10, 64)
 	if err != nil {
 		formatReturn(w, r, ps, ErrorCodeDealUnknown, true, nil)

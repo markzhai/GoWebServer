@@ -25,11 +25,11 @@ type Hellosign struct {
 }
 
 var (
-	HellosignErrorRequest = errors.New("Request error")
-	HellosignErrorNetwork = errors.New("Network error")
-	HellosignErrorAPI = errors.New("API call error")
+	HellosignErrorRequest  = errors.New("Request error")
+	HellosignErrorNetwork  = errors.New("Network error")
+	HellosignErrorAPI      = errors.New("API call error")
 	HellosignErrorResponse = errors.New("Response parsing error")
-	HellosignErrorCall = errors.New("Call error")
+	HellosignErrorCall     = errors.New("Call error")
 )
 
 /* Initializers */
@@ -60,7 +60,7 @@ func (h *Hellosign) log(format string, a ...interface{}) {
 // request takes a call and params to construct a call to HelloSign API
 // and parses response and returns response body for parsing
 func (h *Hellosign) request(call string,
-params map[string]string) (map[string]interface{}, error) {
+	params map[string]string) (map[string]interface{}, error) {
 	form := url.Values{}
 	// Create form with all params
 	for k, v := range params {
@@ -118,7 +118,7 @@ params map[string]string) (map[string]interface{}, error) {
 // CreateEmbeddedWithTemplate sets up a hellosign signing request
 // with a pre-set template id, and captures the request id on success
 func (h *Hellosign) CreateEmbeddedWithTemplate(ti, sn, email, name string,
-ps map[string]interface{}) (string, error) {
+	ps map[string]interface{}) (string, error) {
 	params := map[string]string{"template_id": ti,
 		"client_id": h.clientID,
 		fmt.Sprintf("signers[%v][email_address]", sn): email,
@@ -176,7 +176,7 @@ ps map[string]interface{}) (string, error) {
 // with a pre-captured signature id, and captures the embedded url
 // plus the expiration time on success
 func (h *Hellosign) CreateEmbeddedSignUrl(si string) (string,
-time.Time, error) {
+	time.Time, error) {
 	data, err := h.request(fmt.Sprintf("embedded/sign_url/%v", si), nil)
 	if err != nil {
 		return "", time.Time{}, err

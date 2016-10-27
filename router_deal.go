@@ -16,14 +16,14 @@ import (
 
 // Primitives for docusign document checking
 var (
-	sellLock = &sync.Mutex{}
+	sellLock   = &sync.Mutex{}
 	sellChecks = map[uint64]bool{}
-	buyLock = &sync.Mutex{}
-	buyChecks = map[uint64]bool{}
+	buyLock    = &sync.Mutex{}
+	buyChecks  = map[uint64]bool{}
 )
 
 func dealsHandler(w http.ResponseWriter, r *http.Request,
-ps httprouter.Params, u *User) {
+	ps httprouter.Params, u *User) {
 	// Make sure we don't read more information than user could
 	// Special debug flag does it anyway
 	if u.UserState < UserStateActive {
@@ -40,7 +40,7 @@ ps httprouter.Params, u *User) {
 	dbConn.Find(&closedDeals, "deal_state = ?", DealStateClosed)
 
 	// Read language once
-	reqLang := ps[len(ps) - 2].Value
+	reqLang := ps[len(ps)-2].Value
 	var processDeals = func(deals []Deal) []map[string]interface{} {
 		ds := []map[string]interface{}{}
 		for _, d := range deals {
@@ -122,8 +122,8 @@ ps httprouter.Params, u *User) {
 // If get param is true, do not fail if deal ops have not started,
 // instead return the second part as "" to indicate
 func dealCheckState(w http.ResponseWriter, r *http.Request,
-ps httprouter.Params, u *User, sell bool,
-ds int64, get bool, silent bool, open bool) (*Deal, interface{}, bool) {
+	ps httprouter.Params, u *User, sell bool,
+	ds int64, get bool, silent bool, open bool) (*Deal, interface{}, bool) {
 	// Validate user state
 	if (sell && u.UserState < UserStateActiveId) ||
 		(!sell && u.UserState < UserStateActiveAccredId) {
@@ -238,7 +238,7 @@ ds int64, get bool, silent bool, open bool) (*Deal, interface{}, bool) {
 }
 
 func dealSellEngagementLetterSignHandler(w http.ResponseWriter,
-r *http.Request, ps httprouter.Params, u *User) {
+	r *http.Request, ps httprouter.Params, u *User) {
 	d, dshu, ok := dealCheckState(w, r, ps, u, true,
 		DealShareholderStateEngagementStarted, true, false, true)
 	var dsh *DealShareholder
@@ -273,7 +273,7 @@ r *http.Request, ps httprouter.Params, u *User) {
 		if u.Address2 != "" {
 			address += " " + u.Address2
 		}
-		reqLang := ps[len(ps) - 2].Value
+		reqLang := ps[len(ps)-2].Value
 		eid, et, err := serverDocusign.CreateEnvelopeWithTemplate(
 			docusignSellEngagementLetter,
 			"client", uid, SignTexts[reqLang][SignSellEngagementLetter],
@@ -360,7 +360,7 @@ r *http.Request, ps httprouter.Params, u *User) {
 }
 
 func dealSellEngagementLetterCheckHandler(w http.ResponseWriter,
-r *http.Request, ps httprouter.Params, u *User) {
+	r *http.Request, ps httprouter.Params, u *User) {
 	// Start docusign checking lock asap
 	did, err := strconv.ParseUint(ps.ByName("id"), 10, 64)
 	if err != nil {
@@ -437,7 +437,7 @@ r *http.Request, ps httprouter.Params, u *User) {
 	}
 
 	// Create token for view
-	b := make([]byte, TokenMinMax / 2)
+	b := make([]byte, TokenMinMax/2)
 	crand.Read(b)
 	dsh.EngagementLetterToken = fmt.Sprintf("%x", b)
 	dsh.DealShareholderState = DealShareholderStateEngagementLetterSigned
@@ -453,7 +453,7 @@ r *http.Request, ps httprouter.Params, u *User) {
 }
 
 func dealSellNewOfferHandler(w http.ResponseWriter, r *http.Request,
-ps httprouter.Params, u *User) {
+	ps httprouter.Params, u *User) {
 	d, dshu, ok := dealCheckState(w, r, ps, u, true,
 		DealShareholderStateEngagementLetterSigned, false, false, false)
 	if !ok {
@@ -645,7 +645,7 @@ ps httprouter.Params, u *User) {
 }
 
 func dealNewSellNewOfferHandler(w http.ResponseWriter, r *http.Request,
-ps httprouter.Params, u *User) {
+	ps httprouter.Params, u *User) {
 	cname, of := CheckFieldForm("", r, "company_name")
 
 	if of != "" {
@@ -719,7 +719,7 @@ ps httprouter.Params, u *User) {
 }
 
 func dealSellHandler(w http.ResponseWriter, r *http.Request,
-ps httprouter.Params, u *User) {
+	ps httprouter.Params, u *User) {
 	d, dshu, ok := dealCheckState(w, r, ps, u, true,
 		DealShareholderStateEngagementStarted, true, false, false)
 	if !ok {
@@ -774,7 +774,7 @@ ps httprouter.Params, u *User) {
 		pifc := path.Join(dataDir, "deal", fmt.Sprintf("%v", d.ID),
 			fmt.Sprintf("%v", u.ID), "sell_engagement_letter")
 		if _, err := os.Stat(pifc); err == nil {
-			b := make([]byte, TokenMinMax / 2)
+			b := make([]byte, TokenMinMax/2)
 			crand.Read(b)
 			dsh.EngagementLetterToken = fmt.Sprintf("%x", b)
 			// Ignore saving problems
@@ -877,7 +877,7 @@ ps httprouter.Params, u *User) {
 // dealSellGetOffer checks a specific file related to selling and returns
 // the offer or nil on error
 func dealSellGetOffer(w http.ResponseWriter, r *http.Request,
-ps httprouter.Params, u *User) *Offer {
+	ps httprouter.Params, u *User) *Offer {
 	d, dshu, ok := dealCheckState(w, r, ps, u, true,
 		DealShareholderStateOfferCreated, true, true, false)
 	if !ok {
@@ -915,7 +915,7 @@ ps httprouter.Params, u *User) *Offer {
 // a previously-generated token
 // tiname is the token index name in the offer
 func dealSellTokenGetOffer(w http.ResponseWriter, r *http.Request,
-ps httprouter.Params, tiname string) *Offer {
+	ps httprouter.Params, tiname string) *Offer {
 	// Check token for offer
 	token, ok := CheckLength(true, ps.ByName("token"),
 		TokenMinMax, TokenMinMax)
@@ -925,7 +925,7 @@ ps httprouter.Params, tiname string) *Offer {
 
 	// Check token validity
 	var offer Offer
-	if dbConn.First(&offer, tiname + " = ?", token).RecordNotFound() {
+	if dbConn.First(&offer, tiname+" = ?", token).RecordNotFound() {
 		return nil
 	}
 
@@ -933,7 +933,7 @@ ps httprouter.Params, tiname string) *Offer {
 }
 
 func dealSellShareCertificateHandler(w http.ResponseWriter, r *http.Request,
-ps httprouter.Params, u *User) {
+	ps httprouter.Params, u *User) {
 	o := dealSellGetOffer(w, r, ps, u)
 	if o != nil {
 		pifc := path.Join(dataDir, "deal", fmt.Sprintf("%v", o.DealID),
@@ -944,7 +944,7 @@ ps httprouter.Params, u *User) {
 }
 
 func dealSellShareCertificateTokenHandler(w http.ResponseWriter,
-r *http.Request, ps httprouter.Params) {
+	r *http.Request, ps httprouter.Params) {
 	o := dealSellTokenGetOffer(w, r, ps, "share_certificate_token")
 	if o != nil {
 		pifc := path.Join(dataDir, "deal", fmt.Sprintf("%v", o.DealID),
@@ -955,7 +955,7 @@ r *http.Request, ps httprouter.Params) {
 }
 
 func dealSellCompanyByLawsHandler(w http.ResponseWriter, r *http.Request,
-ps httprouter.Params, u *User) {
+	ps httprouter.Params, u *User) {
 	o := dealSellGetOffer(w, r, ps, u)
 	if o != nil {
 		pifc := path.Join(dataDir, "deal", fmt.Sprintf("%v", o.DealID),
@@ -966,7 +966,7 @@ ps httprouter.Params, u *User) {
 }
 
 func dealSellCompanyByLawsTokenHandler(w http.ResponseWriter,
-r *http.Request, ps httprouter.Params) {
+	r *http.Request, ps httprouter.Params) {
 	o := dealSellTokenGetOffer(w, r, ps, "company_by_laws_token")
 	if o != nil {
 		pifc := path.Join(dataDir, "deal", fmt.Sprintf("%v", o.DealID),
@@ -977,7 +977,7 @@ r *http.Request, ps httprouter.Params) {
 }
 
 func dealSellShareholderAgreementHandler(w http.ResponseWriter,
-r *http.Request, ps httprouter.Params, u *User) {
+	r *http.Request, ps httprouter.Params, u *User) {
 	o := dealSellGetOffer(w, r, ps, u)
 	if o != nil {
 		pifc := path.Join(dataDir, "deal", fmt.Sprintf("%v", o.DealID),
@@ -988,7 +988,7 @@ r *http.Request, ps httprouter.Params, u *User) {
 }
 
 func dealSellShareholderAgreementTokenHandler(w http.ResponseWriter,
-r *http.Request, ps httprouter.Params) {
+	r *http.Request, ps httprouter.Params) {
 	o := dealSellTokenGetOffer(w, r, ps, "shareholder_agreement_token")
 	if o != nil {
 		pifc := path.Join(dataDir, "deal", fmt.Sprintf("%v", o.DealID),
@@ -999,7 +999,7 @@ r *http.Request, ps httprouter.Params) {
 }
 
 func dealSellStockOptionPlanHandler(w http.ResponseWriter, r *http.Request,
-ps httprouter.Params, u *User) {
+	ps httprouter.Params, u *User) {
 	o := dealSellGetOffer(w, r, ps, u)
 	if o != nil {
 		pifc := path.Join(dataDir, "deal", fmt.Sprintf("%v", o.DealID),
@@ -1010,7 +1010,7 @@ ps httprouter.Params, u *User) {
 }
 
 func dealSellStockOptionPlanTokenHandler(w http.ResponseWriter,
-r *http.Request, ps httprouter.Params) {
+	r *http.Request, ps httprouter.Params) {
 	o := dealSellTokenGetOffer(w, r, ps, "stock_option_plan_token")
 	if o != nil {
 		pifc := path.Join(dataDir, "deal", fmt.Sprintf("%v", o.DealID),
@@ -1027,8 +1027,8 @@ r *http.Request, ps httprouter.Params) {
 // "name" is the document name saved and "tiname" is the token index name
 // to search for (token only)
 func dealSellDocumentDownloadHandler(w http.ResponseWriter,
-r *http.Request, ps httprouter.Params, u *User, ms uint64,
-name, tiname string) {
+	r *http.Request, ps httprouter.Params, u *User, ms uint64,
+	name, tiname string) {
 	var dsh *DealShareholder
 	if u != nil {
 		_, dshu, ok := dealCheckState(w, r, ps, u, true, int64(ms),
@@ -1048,7 +1048,7 @@ name, tiname string) {
 			return
 		}
 		var dsho DealShareholder
-		if dbConn.First(&dsho, tiname + " = ?", token).RecordNotFound() {
+		if dbConn.First(&dsho, tiname+" = ?", token).RecordNotFound() {
 			return
 		}
 		dsh = &dsho
@@ -1064,21 +1064,21 @@ name, tiname string) {
 }
 
 func dealSellEngagementLetterHandler(w http.ResponseWriter, r *http.Request,
-ps httprouter.Params, u *User) {
+	ps httprouter.Params, u *User) {
 	dealSellDocumentDownloadHandler(w, r, ps, u,
 		DealShareholderStateEngagementLetterSigned,
 		"sell_engagement_letter", "")
 }
 
 func dealSellEngagementLetterTokenHandler(w http.ResponseWriter,
-r *http.Request, ps httprouter.Params) {
+	r *http.Request, ps httprouter.Params) {
 	dealSellDocumentDownloadHandler(w, r, ps, nil,
 		DealShareholderStateEngagementLetterSigned,
 		"sell_engagement_letter", "engagement_letter_token")
 }
 
 func dealSellBankInfoHandler(w http.ResponseWriter, r *http.Request,
-ps httprouter.Params, u *User) {
+	ps httprouter.Params, u *User) {
 	_, dshu, ok := dealCheckState(w, r, ps, u, true,
 		DealShareholderStateAdminApprovedOffer, false, false, true)
 	if !ok {
@@ -1152,7 +1152,7 @@ ps httprouter.Params, u *User) {
 }
 
 func dealBuyEngagementLetterSignHandler(w http.ResponseWriter,
-r *http.Request, ps httprouter.Params, u *User) {
+	r *http.Request, ps httprouter.Params, u *User) {
 	d, diu, ok := dealCheckState(w, r, ps, u, false,
 		DealInvestorStateEngagementStarted, true, false, true)
 	var di *DealInvestor
@@ -1187,7 +1187,7 @@ r *http.Request, ps httprouter.Params, u *User) {
 		if u.Address2 != "" {
 			address += " " + u.Address2
 		}
-		reqLang := ps[len(ps) - 2].Value
+		reqLang := ps[len(ps)-2].Value
 		eid, et, err := serverDocusign.CreateEnvelopeWithTemplate(
 			docusignBuyEngagementLetter,
 			"client", uid, SignTexts[reqLang][SignBuyEngagementLetter],
@@ -1272,7 +1272,7 @@ r *http.Request, ps httprouter.Params, u *User) {
 }
 
 func dealBuyEngagementLetterCheckHandler(w http.ResponseWriter,
-r *http.Request, ps httprouter.Params, u *User) {
+	r *http.Request, ps httprouter.Params, u *User) {
 	// Start docusign checking lock asap
 	did, err := strconv.ParseUint(ps.ByName("id"), 10, 64)
 	if err != nil {
@@ -1349,7 +1349,7 @@ r *http.Request, ps httprouter.Params, u *User) {
 	}
 
 	// Create token for view
-	b := make([]byte, TokenMinMax / 2)
+	b := make([]byte, TokenMinMax/2)
 	crand.Read(b)
 	di.EngagementLetterToken = fmt.Sprintf("%x", b)
 	di.DealInvestorState = DealInvestorStateEngagementLetterSigned
@@ -1365,7 +1365,7 @@ r *http.Request, ps httprouter.Params, u *User) {
 }
 
 func dealBuyNewInterestHandler(w http.ResponseWriter, r *http.Request,
-ps httprouter.Params, u *User) {
+	ps httprouter.Params, u *User) {
 	d, diu, ok := dealCheckState(w, r, ps, u, false,
 		DealInvestorStateEngagementLetterSigned, false, false, true)
 	if !ok {
@@ -1406,7 +1406,7 @@ ps httprouter.Params, u *User) {
 }
 
 func dealBuyHandler(w http.ResponseWriter, r *http.Request,
-ps httprouter.Params, u *User) {
+	ps httprouter.Params, u *User) {
 	d, diu, ok := dealCheckState(w, r, ps, u, false,
 		DealInvestorStateEngagementStarted, true, false, true)
 	if !ok {
@@ -1456,7 +1456,7 @@ ps httprouter.Params, u *User) {
 		pifc := path.Join(dataDir, "deal", fmt.Sprintf("%v", d.ID),
 			fmt.Sprintf("%v", u.ID), "buy_engagement_letter")
 		if _, err := os.Stat(pifc); err == nil {
-			b := make([]byte, TokenMinMax / 2)
+			b := make([]byte, TokenMinMax/2)
 			crand.Read(b)
 			di.EngagementLetterToken = fmt.Sprintf("%x", b)
 			files["engagement_letter"] = di.EngagementLetterToken
@@ -1472,7 +1472,7 @@ ps httprouter.Params, u *User) {
 		pifc := path.Join(dataDir, "deal", fmt.Sprintf("%v", d.ID),
 			fmt.Sprintf("%v", u.ID), "summary_of_terms")
 		if _, err := os.Stat(pifc); err == nil {
-			b := make([]byte, TokenMinMax / 2)
+			b := make([]byte, TokenMinMax/2)
 			crand.Read(b)
 			di.SummaryOfTermsToken = fmt.Sprintf("%x", b)
 			files["summary_terms"] = di.SummaryOfTermsToken
@@ -1498,7 +1498,7 @@ ps httprouter.Params, u *User) {
 		pifc := path.Join(dataDir, "deal", fmt.Sprintf("%v", d.ID),
 			fmt.Sprintf("%v", u.ID), "de_ppm")
 		if _, err := os.Stat(pifc); err == nil {
-			b := make([]byte, TokenMinMax / 2)
+			b := make([]byte, TokenMinMax/2)
 			crand.Read(b)
 			di.DePpmToken = fmt.Sprintf("%x", b)
 			files["de_ppm"] = di.DePpmToken
@@ -1510,7 +1510,7 @@ ps httprouter.Params, u *User) {
 		pifc := path.Join(dataDir, "deal", fmt.Sprintf("%v", d.ID),
 			fmt.Sprintf("%v", u.ID), "de_operating_agreement")
 		if _, err := os.Stat(pifc); err == nil {
-			b := make([]byte, TokenMinMax / 2)
+			b := make([]byte, TokenMinMax/2)
 			crand.Read(b)
 			di.DeOperatingAgreementToken = fmt.Sprintf("%x", b)
 			files["de_operating"] = di.DeOperatingAgreementToken
@@ -1522,7 +1522,7 @@ ps httprouter.Params, u *User) {
 		pifc := path.Join(dataDir, "deal", fmt.Sprintf("%v", d.ID),
 			fmt.Sprintf("%v", u.ID), "de_subscription_agreement")
 		if _, err := os.Stat(pifc); err == nil {
-			b := make([]byte, TokenMinMax / 2)
+			b := make([]byte, TokenMinMax/2)
 			crand.Read(b)
 			di.DeSubscriptionAgreementToken = fmt.Sprintf("%x", b)
 			files["de_subscription"] = di.DeSubscriptionAgreementToken
@@ -1531,7 +1531,7 @@ ps httprouter.Params, u *User) {
 
 	// Check if wire information can be displayed
 	if di.DealInvestorState >= DealInvestorStateWaitingFundTransfer {
-		reqLang := ps[len(ps) - 2].Value
+		reqLang := ps[len(ps)-2].Value
 		if reqLang == "zh-CN" {
 			args["wire"] = d.EscrowAccountCn
 		} else {
@@ -1556,8 +1556,8 @@ ps httprouter.Params, u *User) {
 // "name" is the document name saved and "tiname" is the token index name
 // to search for (token only)
 func dealBuyDocumentDownloadHandler(w http.ResponseWriter,
-r *http.Request, ps httprouter.Params, u *User, ms uint64,
-name, tiname string) {
+	r *http.Request, ps httprouter.Params, u *User, ms uint64,
+	name, tiname string) {
 	var di *DealInvestor
 	if u != nil {
 		_, diu, ok := dealCheckState(w, r, ps, u, false, int64(ms),
@@ -1577,7 +1577,7 @@ name, tiname string) {
 			return
 		}
 		var dio DealInvestor
-		if dbConn.First(&dio, tiname + " = ?", token).RecordNotFound() {
+		if dbConn.First(&dio, tiname+" = ?", token).RecordNotFound() {
 			return
 		}
 		di = &dio
@@ -1593,77 +1593,77 @@ name, tiname string) {
 }
 
 func dealBuyEngagementLetterHandler(w http.ResponseWriter, r *http.Request,
-ps httprouter.Params, u *User) {
+	ps httprouter.Params, u *User) {
 	dealBuyDocumentDownloadHandler(w, r, ps, u,
 		DealInvestorStateEngagementLetterSigned,
 		"buy_engagement_letter", "")
 }
 
 func dealBuyEngagementLetterTokenHandler(w http.ResponseWriter,
-r *http.Request, ps httprouter.Params) {
+	r *http.Request, ps httprouter.Params) {
 	dealBuyDocumentDownloadHandler(w, r, ps, nil,
 		DealInvestorStateEngagementLetterSigned,
 		"buy_engagement_letter", "engagement_letter_token")
 }
 
 func dealBuySummaryTermsHandler(w http.ResponseWriter, r *http.Request,
-ps httprouter.Params, u *User) {
+	ps httprouter.Params, u *User) {
 	dealBuyDocumentDownloadHandler(w, r, ps, u,
 		DealInvestorStateSummaryTermsSigned,
 		"summary_of_terms", "")
 }
 
 func dealBuySummaryTermsTokenHandler(w http.ResponseWriter,
-r *http.Request, ps httprouter.Params) {
+	r *http.Request, ps httprouter.Params) {
 	dealBuyDocumentDownloadHandler(w, r, ps, nil,
 		DealInvestorStateSummaryTermsSigned,
 		"summary_of_terms", "summary_of_terms_token")
 }
 
 func dealBuyDePpmHandler(w http.ResponseWriter, r *http.Request,
-ps httprouter.Params, u *User) {
+	ps httprouter.Params, u *User) {
 	dealBuyDocumentDownloadHandler(w, r, ps, u,
 		DealInvestorStateDePpmSigned,
 		"de_ppm", "")
 }
 
 func dealBuyDePpmTokenHandler(w http.ResponseWriter,
-r *http.Request, ps httprouter.Params) {
+	r *http.Request, ps httprouter.Params) {
 	dealBuyDocumentDownloadHandler(w, r, ps, nil,
 		DealInvestorStateDePpmSigned,
 		"de_ppm", "de_ppm_token")
 }
 
 func dealBuyDeOperatingHandler(w http.ResponseWriter,
-r *http.Request, ps httprouter.Params, u *User) {
+	r *http.Request, ps httprouter.Params, u *User) {
 	dealBuyDocumentDownloadHandler(w, r, ps, u,
 		DealInvestorStateDeOperatingAgreementSigned,
 		"de_operating_agreement", "")
 }
 
 func dealBuyDeOperatingTokenHandler(w http.ResponseWriter,
-r *http.Request, ps httprouter.Params) {
+	r *http.Request, ps httprouter.Params) {
 	dealBuyDocumentDownloadHandler(w, r, ps, nil,
 		DealInvestorStateDeOperatingAgreementSigned,
 		"de_operating_agreement", "de_operating_agreement_token")
 }
 
 func dealBuyDeSubscriptionHandler(w http.ResponseWriter,
-r *http.Request, ps httprouter.Params, u *User) {
+	r *http.Request, ps httprouter.Params, u *User) {
 	dealBuyDocumentDownloadHandler(w, r, ps, u,
 		DealInvestorStateDeSubscriptionAgreementSigned,
 		"de_subscription_agreement", "")
 }
 
 func dealBuyDeSubscriptionTokenHandler(w http.ResponseWriter,
-r *http.Request, ps httprouter.Params) {
+	r *http.Request, ps httprouter.Params) {
 	dealBuyDocumentDownloadHandler(w, r, ps, nil,
 		DealInvestorStateDeSubscriptionAgreementSigned,
 		"de_subscription_agreement", "de_subscription_agreement_token")
 }
 
 func dealBuySummaryTermsSignHandler(w http.ResponseWriter, r *http.Request,
-ps httprouter.Params, u *User) {
+	ps httprouter.Params, u *User) {
 	d, diu, ok := dealCheckState(w, r, ps, u, false,
 		DealInvestorStateInterestSubmitted, false, false, true)
 	if !ok {
@@ -1688,7 +1688,7 @@ ps httprouter.Params, u *User) {
 			formatReturn(w, r, ps, ErrorCodeDealDocusignError, true, nil)
 			return
 		}
-		reqLang := ps[len(ps) - 2].Value
+		reqLang := ps[len(ps)-2].Value
 		eid, et, err := serverDocusign.CreateEnvelopeWithTemplate(
 			docusignBuySummaryOfTerms,
 			"client", uid, SignTexts[reqLang][SignBuySummaryOfTerms],
@@ -1743,7 +1743,7 @@ ps httprouter.Params, u *User) {
 }
 
 func dealBuySummaryTermsCheckHandler(w http.ResponseWriter, r *http.Request,
-ps httprouter.Params, u *User) {
+	ps httprouter.Params, u *User) {
 	// Start docusign checking lock asap
 	did, err := strconv.ParseUint(ps.ByName("id"), 10, 64)
 	if err != nil {
@@ -1820,7 +1820,7 @@ ps httprouter.Params, u *User) {
 	}
 
 	// Create token for view
-	b := make([]byte, TokenMinMax / 2)
+	b := make([]byte, TokenMinMax/2)
 	crand.Read(b)
 	di.SummaryOfTermsToken = fmt.Sprintf("%x", b)
 	di.DealInvestorState = DealInvestorStateSummaryTermsSigned
@@ -1836,7 +1836,7 @@ ps httprouter.Params, u *User) {
 }
 
 func dealBuyBankInfoHandler(w http.ResponseWriter, r *http.Request,
-ps httprouter.Params, u *User) {
+	ps httprouter.Params, u *User) {
 	_, diu, ok := dealCheckState(w, r, ps, u, false,
 		DealInvestorStateAdminApprovedInterest, false, false, true)
 	if !ok {
@@ -1909,7 +1909,7 @@ ps httprouter.Params, u *User) {
 }
 
 func dealBuyDePpmSignHandler(w http.ResponseWriter, r *http.Request,
-ps httprouter.Params, u *User) {
+	ps httprouter.Params, u *User) {
 	d, diu, ok := dealCheckState(w, r, ps, u, false,
 		DealInvestorStateBankVerified, false, false, true)
 	if !ok {
@@ -1940,7 +1940,7 @@ ps httprouter.Params, u *User) {
 			formatReturn(w, r, ps, ErrorCodeDealDocusignError, true, nil)
 			return
 		}
-		reqLang := ps[len(ps) - 2].Value
+		reqLang := ps[len(ps)-2].Value
 		eid, et, err := serverDocusign.CreateEnvelopeWithTemplate(
 			docusignBuyDePpm,
 			"client", uid, SignTexts[reqLang][SignBuyDePpm],
@@ -1997,7 +1997,7 @@ ps httprouter.Params, u *User) {
 }
 
 func dealBuyDePpmCheckHandler(w http.ResponseWriter, r *http.Request,
-ps httprouter.Params, u *User) {
+	ps httprouter.Params, u *User) {
 	// Start docusign checking lock asap
 	did, err := strconv.ParseUint(ps.ByName("id"), 10, 64)
 	if err != nil {
@@ -2074,7 +2074,7 @@ ps httprouter.Params, u *User) {
 	}
 
 	// Create token for view
-	b := make([]byte, TokenMinMax / 2)
+	b := make([]byte, TokenMinMax/2)
 	crand.Read(b)
 	di.DePpmToken = fmt.Sprintf("%x", b)
 	di.DealInvestorState = DealInvestorStateDePpmSigned
@@ -2090,7 +2090,7 @@ ps httprouter.Params, u *User) {
 }
 
 func dealBuyDeOperatingSignHandler(w http.ResponseWriter, r *http.Request,
-ps httprouter.Params, u *User) {
+	ps httprouter.Params, u *User) {
 	d, diu, ok := dealCheckState(w, r, ps, u, false,
 		DealInvestorStateDePpmSigned, false, false, true)
 	if !ok {
@@ -2115,7 +2115,7 @@ ps httprouter.Params, u *User) {
 			formatReturn(w, r, ps, ErrorCodeDealDocusignError, true, nil)
 			return
 		}
-		reqLang := ps[len(ps) - 2].Value
+		reqLang := ps[len(ps)-2].Value
 		eid, et, err := serverDocusign.CreateEnvelopeWithTemplate(
 			docusignBuyDeOperatingAgreement,
 			"client", uid, SignTexts[reqLang][SignBuyDeOperatingAgreement],
@@ -2170,7 +2170,7 @@ ps httprouter.Params, u *User) {
 }
 
 func dealBuyDeOperatingCheckHandler(w http.ResponseWriter, r *http.Request,
-ps httprouter.Params, u *User) {
+	ps httprouter.Params, u *User) {
 	// Start docusign checking lock asap
 	did, err := strconv.ParseUint(ps.ByName("id"), 10, 64)
 	if err != nil {
@@ -2247,7 +2247,7 @@ ps httprouter.Params, u *User) {
 	}
 
 	// Create token for view
-	b := make([]byte, TokenMinMax / 2)
+	b := make([]byte, TokenMinMax/2)
 	crand.Read(b)
 	di.DeOperatingAgreementToken = fmt.Sprintf("%x", b)
 	di.DealInvestorState = DealInvestorStateDeOperatingAgreementSigned
@@ -2263,7 +2263,7 @@ ps httprouter.Params, u *User) {
 }
 
 func dealBuyDeSubscriptionSignHandler(w http.ResponseWriter, r *http.Request,
-ps httprouter.Params, u *User) {
+	ps httprouter.Params, u *User) {
 	d, diu, ok := dealCheckState(w, r, ps, u, false,
 		DealInvestorStateDeOperatingAgreementSigned, false, false, true)
 	if !ok {
@@ -2296,7 +2296,7 @@ ps httprouter.Params, u *User) {
 		amountp := di.SharesBuyAmount
 		amounte := uint64(float64(amountp) * 0.05)
 		amountt := amountp + amounte
-		reqLang := ps[len(ps) - 2].Value
+		reqLang := ps[len(ps)-2].Value
 		eid, et, err := serverDocusign.CreateEnvelopeWithTemplate(
 			docusignBuyDeSubscriptionAgreement,
 			"client", uid, SignTexts[reqLang][SignBuyDeSubscriptionAgreement],
@@ -2355,7 +2355,7 @@ ps httprouter.Params, u *User) {
 }
 
 func dealBuyDeSubscriptionCheckHandler(w http.ResponseWriter, r *http.Request,
-ps httprouter.Params, u *User) {
+	ps httprouter.Params, u *User) {
 	// Start docusign checking lock asap
 	did, err := strconv.ParseUint(ps.ByName("id"), 10, 64)
 	if err != nil {
@@ -2433,7 +2433,7 @@ ps httprouter.Params, u *User) {
 	}
 
 	// Create token for view
-	b := make([]byte, TokenMinMax / 2)
+	b := make([]byte, TokenMinMax/2)
 	crand.Read(b)
 	di.DeSubscriptionAgreementToken = fmt.Sprintf("%x", b)
 	di.DealInvestorState = DealInvestorStateDeSubscriptionAgreementSigned

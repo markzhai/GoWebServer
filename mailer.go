@@ -8,11 +8,11 @@ import (
 )
 
 const (
-	emailConfirmLink = "%v/u/#/pages/info?token=%v"
-	emailForgetLink = "%v/u/#/pages/recover?token=%v"
-	emailInvestorLink = "%v/u/#/investors/dashboard"
+	emailConfirmLink     = "%v/u/#/pages/info?token=%v"
+	emailForgetLink      = "%v/u/#/pages/recover?token=%v"
+	emailInvestorLink    = "%v/u/#/investors/dashboard"
 	emailShareholderLink = "%v/u/#/shareholders/dashboard"
-	tokenExpiration = 30 * time.Minute
+	tokenExpiration      = 30 * time.Minute
 )
 
 const tmpl = `From: "%v" <%v>

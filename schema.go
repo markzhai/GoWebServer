@@ -183,10 +183,14 @@ type User struct {
 	DealShareholders                   []DealShareholder
 	DealInvestors                      []DealInvestor
 	Wechat                             Wechat
+	WxOpenID                           string `sql:"index"`
+	WxUnionID                          string `sql:"index"`
+	WxAccessToken                      string
 	UserState                          uint64
 	UserLevel                          uint64
 	FirstName                          string
 	MiddleInitial                      string
+	IDCardNumber                       string
 	LastName                           string
 	FullName                           string
 	Email                              string `sql:"index"`
@@ -513,11 +517,24 @@ type Wechat struct {
 	gorm.Model
 	UserID           uint64 `sql:"index"`
 	WechatState      uint64
-	WechatId         string
+	OpenID           string `sql:"index"`
+	UnionID          string `sql:"index"`
+
 	PhotoIDPic       string
 	PhotoIDName      string
 	PhotoIDType      string
 	CitizenType      uint64
 	OverseasBank     uint64
 	InvestmentAmount uint64
+
+	Nickname         string
+	Sex              int
+	City             string
+	Country          string
+	Province         string
+	Language         string
+	HeadImgUrl       string
+	SubscribeTime    string
+	GroupID          string `sql:"index"`
+	Remark           string
 }

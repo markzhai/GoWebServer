@@ -4,7 +4,9 @@
 package main
 
 import (
+	"fmt"
 	valid "github.com/asaskevich/govalidator"
+	"math"
 	"net/http"
 	"strconv"
 	"strings"
@@ -12,22 +14,23 @@ import (
 )
 
 const (
-	StringMax uint64 = 255
-	StringPlusMax uint64 = 1000
+	StringMax      uint64 = 255
+	StringPlusMax  uint64 = 1000
 	StringBlockMax uint64 = 10000
-	JsonMax uint64 = 10 * 1024 * 1024
+	JsonMax        uint64 = 10 * 1024 * 1024
 	PasswordMinMax uint64 = 128
-	TokenMinMax uint64 = 64
-	PhoneMin uint64 = 5
-	PhoneMax uint64 = 20
-	ZipMin uint64 = 5
-	ZipMax uint64 = 20
-	CountryMinMax uint64 = 2
-	NoYesMax uint64 = 1
-	NumberMax uint64 = ^uint64(0)
-	PercentMax uint64 = 100
-	OpenIdMinMax uint64 = 28
-	TimeMax uint64 = 1 << 63 - 1
+	TokenMinMax    uint64 = 64
+	PhoneMin       uint64 = 5
+	PhoneMax       uint64 = 20
+	ZipMin         uint64 = 5
+	ZipMax         uint64 = 20
+	CountryMinMax  uint64 = 2
+	NoYesMax       uint64 = 1
+	NumberMax      uint64 = ^uint64(0)
+	PercentMax     uint64 = 100
+	OpenIdMinMax   uint64 = 28
+	TimeMax        uint64 = 1<<63 - 1
+	ID_LEN         int    = 18
 )
 
 var (
@@ -37,7 +40,7 @@ var (
 // CheckEmail makes sure s is at least an RFC compliant address
 // Further email ownership verification is required afterwards
 func CheckEmail(ok bool, s string) (string, bool) {
-	return s, ok && valid.IsEmail(s)
+	return s, ok && valid.IsEmail(s) && !strings.Contains(s, "+")
 }
 
 // CheckEmailForm is the FormValue version of CheckEmail
@@ -146,7 +149,7 @@ func CheckLength(ok bool, s string, min, max uint64) (string, bool) {
 
 // CheckLengthForm is the FormValue version of CheckLength
 func CheckLengthForm(of string, r *http.Request, f string,
-min, max uint64) (string, string) {
+	min, max uint64) (string, string) {
 	if of != "" {
 		return "", of
 	}
@@ -172,7 +175,7 @@ func CheckRange(ok bool, s string, upper uint64) (uint64, bool) {
 
 // CheckRangeForm is the FormValue version of CheckRange
 func CheckRangeForm(of string, r *http.Request, f string,
-upper uint64) (uint64, string) {
+	upper uint64) (uint64, string) {
 	if of != "" {
 		return 0, of
 	}
@@ -198,7 +201,7 @@ func CheckFloat(ok bool, s string, pos bool) (float64, bool) {
 
 // CheckFloatForm is the FormValue version of CheckFloat
 func CheckFloatForm(of string, r *http.Request, f string,
-pos bool) (float64, string) {
+	pos bool) (float64, string) {
 	if of != "" {
 		return 0.0, of
 	}
@@ -207,4 +210,48 @@ pos bool) (float64, string) {
 		return rs, ""
 	}
 	return rs, f
+}
+
+func CheckIdCardForm(of string, r *http.Request, f string) (string, string) {
+	if of != "" {
+		return "", of
+	}
+	rs, ok := checkIdCardNumber(r.FormValue(f))
+	if ok {
+		return rs, ""
+	}
+	return rs, f
+}
+
+func checkIdCardNumber(str string) (string, bool) {
+	if len(str) != ID_LEN {
+		return str, false
+	}
+	var sum int = 0
+	for k, v := range str {
+		var m = getCharMap(v)
+		if m == -1 {
+			fmt.Print("[utils-cnid] invalid char at [%d] in [%s]\n", k, str)
+			return str, false
+		}
+		sum += m * getWeightValue(k)
+	}
+	return str, (sum % 11) == 1
+}
+
+func getWeightValue(pos int) int {
+	const base float64 = 2
+	var pow float64 = float64(ID_LEN - pos - 1)
+	return int(math.Pow(base, pow)) % 11
+}
+
+func getCharMap(char rune) int {
+	if (char == 0x58) || (char == 0x78) {
+		return 10
+	}
+	if char >= 0x30 && char <= 0x39 {
+		result, _ := strconv.Atoi(string(char))
+		return result
+	}
+	return -1
 }

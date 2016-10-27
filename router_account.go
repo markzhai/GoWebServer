@@ -8,11 +8,12 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hashicorp/golang-lru"
 	"github.com/julienschmidt/httprouter"
 	"golang.org/x/crypto/bcrypt"
 )
 
-var mobileCodeMap = make(map[string]string)
+var cache, ignore = lru.NewARC(1000)
 
 func mobileSendVerificationCodeHandler(w http.ResponseWriter, r *http.Request,
 ps httprouter.Params) {
@@ -25,26 +26,122 @@ ps httprouter.Params) {
 	}
 
 	code := generateCode()
-	mobileCodeMap[phoneNumber] = code
+	cache.Add(phoneNumber, code)
 	send(phoneNumber, code)
 
 	formatReturn(w, r, ps, ErrorCodeNone, false,
 		map[string]interface{}{
-			"code": code,
+			"code":         code,
 			"phone_number": phoneNumber,
 		})
 }
 
-func accountRegisterHandler(w http.ResponseWriter, r *http.Request,
+func mobileCheckVerificationCodeHandler(w http.ResponseWriter, r *http.Request,
 ps httprouter.Params) {
-	firstName, of := CheckFieldForm("", r, "first_name")
-	lastName, of := CheckFieldForm(of, r, "last_name")
-	password, of := CheckLengthForm(of, r, "password",
-		PasswordMinMax, PasswordMinMax)
-	roleType, of := CheckRangeForm(of, r, "role_type",
-		RoleTypeInvestor)
-	citizenType, of := CheckRangeForm(of, r, "citizen_type",
-		CitizenTypeOther)
+	phoneNumber, of := CheckLengthForm("", r, "phone_number", PhoneMin, PhoneMax)
+	code, of := CheckFieldForm(of, r, "code")
+
+	if of != "" {
+		formatReturnInfo(w, r, ps, ErrorFmtCodeBadArgument, of, false, nil)
+		return
+	}
+
+	val, found := cache.Get(phoneNumber)
+
+	if !found || code != val {
+		formatReturn(w, r, ps, ErrorCodePhoneCodeError, false, nil)
+		return
+	}
+
+	formatReturn(w, r, ps, ErrorCodeNone, false, nil)
+}
+
+func wechatLoginHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	openid, of := CheckFieldForm("", r, "openid")
+	unionid, of := CheckFieldForm(of, r, "unionid")
+
+	if of != "" {
+		formatReturnInfo(w, r, ps, ErrorFmtCodeBadArgument, of, false, nil)
+		return
+	}
+
+	// Email must match
+	var currentUser User
+
+	if unionid != "" {
+		if dbConn.First(&currentUser, "wx_open_id = ?", openid).RecordNotFound() {
+			formatReturn(w, r, ps, ErrorCodePhoneUnknown, false, nil)
+			return
+		}
+	} else {
+		if dbConn.First(&currentUser, "wx_union_id = ?", unionid).RecordNotFound() {
+			formatReturn(w, r, ps, ErrorCodeEmailUnknown, false, nil)
+			return
+		}
+	}
+
+	saveLogin(w, r, ps, true, &currentUser, nil)
+}
+
+func wechatBindHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	openid, of := CheckFieldForm("", r, "openid")
+	unionid, of := CheckFieldForm(of, r, "unionid")
+	password, of := CheckLengthForm(of, r, "password", PasswordMinMax, PasswordMinMax)
+
+	if of != "" {
+		formatReturnInfo(w, r, ps, ErrorFmtCodeBadArgument, of, false, nil)
+		return
+	}
+
+	email, of := CheckEmailForm(of, r, "email")
+	phoneNumber := ""
+	if of != "" {
+		phoneNumber, of = CheckLengthForm("", r, "email", PhoneMin, PhoneMax)
+	}
+	if of != "" {
+		formatReturnInfo(w, r, ps, ErrorFmtCodeBadArgument, of, false, nil)
+		return
+	}
+
+	var currentUser User
+
+	if phoneNumber != "" {
+		if dbConn.First(&currentUser, "phone_number = ?", phoneNumber).RecordNotFound() {
+			formatReturn(w, r, ps, ErrorCodePhoneUnknown, false, nil)
+			return
+		}
+	} else {
+		email = strings.ToLower(email)
+		if dbConn.First(&currentUser, "email = ?", email).RecordNotFound() {
+			formatReturn(w, r, ps, ErrorCodeEmailUnknown, false, nil)
+			return
+		}
+	}
+
+	// Password must match hash
+	mismatch := bcrypt.CompareHashAndPassword([]byte(currentUser.PasswordHash),
+		[]byte(password))
+	if mismatch != nil {
+		formatReturn(w, r, ps, ErrorCodeBadPassword, false, nil)
+		return
+	}
+
+	if currentUser.WxOpenID != "" || currentUser.WxUnionID != "" {
+		formatReturn(w, r, ps, ErrorCodeWechatBinded, false, nil)
+		return
+	}
+
+	currentUser.WxUnionID = unionid
+	currentUser.WxOpenID = openid
+
+	saveLogin(w, r, ps, true, &currentUser, nil)
+}
+
+func accountRegisterHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	firstName, ignore := CheckFieldForm("", r, "first_name")
+	lastName, ignore := CheckFieldForm("", r, "last_name")
+	roleType, of := CheckRangeForm("", r, "role_type", RoleTypeInvestor)
+	citizenType, of := CheckRangeForm(of, r, "citizen_type", CitizenTypeOther)
 
 	var phoneNumber = ""
 	var email = ""
@@ -56,11 +153,16 @@ ps httprouter.Params) {
 			formatReturnInfo(w, r, ps, ErrorFmtCodeBadArgument, of, false, nil)
 			return
 		}
-		if code != mobileCodeMap[phoneNumber] {
+
+		val, found := cache.Get(phoneNumber)
+
+		if !found || code != val {
 			formatReturn(w, r, ps, ErrorCodePhoneCodeError, false, nil)
 			return
 		}
-		delete(mobileCodeMap, phoneNumber);
+		// phone verification code okay, just remove it.
+		cache.Remove(phoneNumber)
+
 	} else {
 		email, of = CheckEmailForm(of, r, "email")
 	}
@@ -70,35 +172,47 @@ ps httprouter.Params) {
 		return
 	}
 
+	password, of := CheckLengthForm("", r, "password", PasswordMinMax, PasswordMinMax)
+
+	email = strings.ToLower(email)
 	if citizenType == CitizenTypeOther {
 		if !dbConn.First(&User{}, "phone_number = ?", phoneNumber).RecordNotFound() {
 			formatReturn(w, r, ps, ErrorCodePhoneExists, false, nil)
 			return
 		}
 	} else {
-		email = strings.ToLower(email)
 		if !dbConn.First(&User{}, "email = ?", email).RecordNotFound() {
 			formatReturn(w, r, ps, ErrorCodeEmailExists, false, nil)
 			return
 		}
 	}
 
-
-	// Previous email check serves as an unsafe "barrier",
-	// but if even two goroutines both pass through to here at the same time,
-	// only one Create succeeds
-	passwordHash, err := bcrypt.GenerateFromPassword([]byte(password),
-		bcrypt.DefaultCost)
-	// Return unknown register error here
-	if err != nil {
-		formatReturn(w, r, ps, ErrorCodeRegisterError, false, nil)
-		return
+	passwordHashStr := ""
+	if password != "" {
+		// Previous email check serves as an unsafe "barrier",
+		// but if even two goroutines both pass through to here at the same time,
+		// only one Create succeeds
+		passwordHash, err := bcrypt.GenerateFromPassword([]byte(password),
+			bcrypt.DefaultCost)
+		// Return unknown register error here
+		if err != nil {
+			formatReturnInfo(w, r, ps, ErrorCodeRegisterError, err.Error(), false, nil)
+			//formatReturn(w, r, ps, ErrorCodeRegisterError, false, nil)
+			return
+		}
+		passwordHashStr = string(passwordHash)
 	}
+
 	// Generate email activation code
 	b := make([]byte, TokenMinMax / 2)
 	crand.Read(b)
 	emailToken := fmt.Sprintf("%x", b)
-	fullName := NameConventions[citizenType](firstName, lastName)
+
+	fullName := ""
+	if ignore == "" {
+		fullName = NameConventions[citizenType](firstName, lastName)
+	}
+
 	// Infer country from citizen type
 	// In the future this should be an input as well
 	country := "US"
@@ -113,13 +227,14 @@ ps httprouter.Params) {
 		EmailToken:        emailToken,
 		EmailTokenExpire:  time.Now().Add(tokenExpiration),
 		PhoneNumber:       phoneNumber,
-		PasswordHash:      string(passwordHash),
+		PasswordHash:      passwordHashStr,
 		RoleType:          roleType,
 		CitizenType:       citizenType,
 		Country:           country,
 		CreationIpAddress: getIp(r)}
 	if dbConn.Create(&newUser).Error != nil {
-		formatReturn(w, r, ps, ErrorCodeRegisterError, false, nil)
+		formatReturnInfo(w, r, ps, ErrorCodeRegisterError, dbConn.Create(&newUser).Error.Error(), false, nil)
+		//formatReturn(w, r, ps, ErrorCodeRegisterError, false, nil)
 		return
 	}
 
@@ -134,11 +249,13 @@ ps httprouter.Params) {
 		sendMail(author, email, fullName, subject, body)
 	}
 
-	saveLogin(w, r, ps, true, &newUser, nil)
+	saveLogin(w, r, ps, true, &newUser,
+		map[string]interface{}{
+			"email_token": emailToken,
+		})
 }
 
-// TODO: accountStateUpdate should be an account confirm function
-// from phone code verification
+// TODO: it should be an account confirm function from phone code verification
 func accountStateUpdate(w http.ResponseWriter, r *http.Request,
 ps httprouter.Params, u *User) {
 	if u.UserState < UserStateConfirmed {
@@ -155,18 +272,6 @@ ps httprouter.Params, u *User) {
 func accountLoginHandler(w http.ResponseWriter, r *http.Request,
 ps httprouter.Params) {
 
-	var email = ""
-	var phoneNumber = ""
-
-	email, of := CheckEmailForm("", r, "email")
-	// If error, try parse as phone number
-	if of != "" {
-		of = ""
-		phoneNumber, of = CheckLengthForm("", r, "email", PhoneMin, PhoneMax)
-	}
-
-	password, of := CheckLengthForm(of, r, "password",
-		PasswordMinMax, PasswordMinMax)
 	confirm, cof := CheckLengthForm("", r, "confirm",
 		TokenMinMax, TokenMinMax)
 
@@ -199,7 +304,7 @@ ps httprouter.Params) {
 		currentUser.EmailToken = ""
 		currentUser.EmailTokenExpire = time.Time{}
 		if currentUser.UserState < UserStateConfirmed {
-			currentUser.UserState = UserStateConfirmed
+			currentUser.UserState = UserStateNdaAgreed //UserStateConfirmed
 		}
 		if dbConn.Save(&currentUser).Error != nil {
 			formatReturn(w, r, ps, ErrorCodeActivationError, false, nil)
@@ -209,6 +314,18 @@ ps httprouter.Params) {
 		saveLogin(w, r, ps, true, &currentUser, nil)
 		return
 	}
+
+	var phoneNumber = ""
+
+	email, of := CheckEmailForm("", r, "email")
+	// If error, try parse as phone number
+	if of != "" {
+		of = ""
+		phoneNumber, of = CheckLengthForm("", r, "email", PhoneMin, PhoneMax)
+	}
+
+	password, of := CheckLengthForm(of, r, "password",
+		PasswordMinMax, PasswordMinMax)
 
 	// Now make sure we can proceed with valid login credentials
 	if of != "" {

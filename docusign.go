@@ -30,12 +30,12 @@ type Docusign struct {
 }
 
 var (
-	DocusignErrorParams = errors.New("Params error")
-	DocusignErrorRequest = errors.New("Request error")
-	DocusignErrorNetwork = errors.New("Network error")
-	DocusignErrorAPI = errors.New("API call error")
+	DocusignErrorParams   = errors.New("Params error")
+	DocusignErrorRequest  = errors.New("Request error")
+	DocusignErrorNetwork  = errors.New("Network error")
+	DocusignErrorAPI      = errors.New("API call error")
 	DocusignErrorResponse = errors.New("Response parsing error")
-	DocusignErrorCall = errors.New("Call error")
+	DocusignErrorCall     = errors.New("Call error")
 )
 
 /* Initializers */
@@ -47,10 +47,10 @@ func init() {
 /* Private helpers */
 
 var (
-	docusignTimeout = 30 * time.Second
-	docusignExpire = 120 * 24 * time.Hour
+	docusignTimeout     = 30 * time.Second
+	docusignExpire      = 120 * 24 * time.Hour
 	docusignStatusDelay = 15 * time.Minute
-	docusignReturnUrl = serverDomain + "/u/#/pages/sign/"
+	docusignReturnUrl   = serverDomain + "/u/#/pages/sign/"
 )
 
 // log checks to see if we should log to server or just stdout
@@ -70,7 +70,7 @@ func (d *Docusign) log(format string, a ...interface{}) {
 // request takes a call and params to construct a call to DocuSign API
 // and parses response and returns response body for parsing
 func (d *Docusign) request(method, call string,
-params map[string]interface{}, raw bool) (map[string]interface{}, error) {
+	params map[string]interface{}, raw bool) (map[string]interface{}, error) {
 	fmt.Printf("on docusign requested")
 	reqId := rand.Int63()
 	// Encode POST and GET differently
@@ -106,9 +106,9 @@ params map[string]interface{}, raw bool) (map[string]interface{}, error) {
 	req.Header.Set("Content-Type", "application/json")
 	// Set authentication
 	req.Header.Set("X-DocuSign-Authentication",
-		"<DocuSignCredentials><Username>" + d.username +
-			"</Username><Password>" + d.password +
-			"</Password><IntegratorKey>" + d.integratorKey +
+		"<DocuSignCredentials><Username>"+d.username+
+			"</Username><Password>"+d.password+
+			"</Password><IntegratorKey>"+d.integratorKey+
 			"</IntegratorKey></DocuSignCredentials>")
 
 	// Create client to push the request
@@ -156,8 +156,8 @@ params map[string]interface{}, raw bool) (map[string]interface{}, error) {
 // with a pre-set template id, and captures the envelope id and expiration
 // time on success
 func (d *Docusign) CreateEnvelopeWithTemplate(ti, rn, cuid, es,
-email, name string, ps map[string]interface{}) (string,
-time.Time, error) {
+	email, name string, ps map[string]interface{}) (string,
+	time.Time, error) {
 	// The outer arguments to use
 	params := map[string]interface{}{
 		"status":       "sent",
@@ -224,7 +224,7 @@ time.Time, error) {
 // The return consists of a map with recipient name, email, clientUserId and
 // roleName with possibly more information as fit
 func (d *Docusign) GetEnvelopeRecipient(eid string) (map[string]string,
-error) {
+	error) {
 	data, err := d.request("GET", fmt.Sprintf("/envelopes/%v/recipients",
 		eid), nil, false)
 	if err != nil {
@@ -285,11 +285,11 @@ error) {
 // CreateEmbeddedRecipientUrl sets up a docusign signing url
 // with a pre-captured envelope id, and captures the embedded url
 func (d *Docusign) CreateEmbeddedRecipientUrl(host, eid, cuid,
-email, name string) (string, error) {
+	email, name string) (string, error) {
 	// The outer arguments to use
 	rurl := docusignReturnUrl
 	if host != "" {
-		rurl = strings.Replace(rurl, serverDomain, serverProto + host, -1)
+		rurl = strings.Replace(rurl, serverDomain, serverProto+host, -1)
 	}
 	params := map[string]interface{}{
 		"userName":             name,

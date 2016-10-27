@@ -67,40 +67,40 @@ var (
 
 // Server configurations
 var (
-	environment = getString("MX_ENVIRONMENT", "development")
-	logFileName = getString("MX_LOG_FILE_NAME", "marketx.log")
-	dbScheme = getString("MX_DB_SCHEME", "postgres")
-	dbUrl = getString("DATABASE_URL", nil)
+	environment   = getString("MX_ENVIRONMENT", "development")
+	logFileName   = getString("MX_LOG_FILE_NAME", "marketx.log")
+	dbScheme      = getString("MX_DB_SCHEME", "postgres")
+	dbUrl         = getString("DATABASE_URL", nil)
 	dbLogFileName = getString("MX_DB_LOG_FILE_NAME", "marketx_db.log")
-	serverProto = getString("MX_SERVER_PROTO", "https://")
-	serverDomain = getString("MX_SERVER_DOMAIN", "https://127.0.0.1")
-	serverPort = getInt("PORT", 443)
-	serverPPort = getInt("MX_SERVER_P_PORT", 8080)
-	clientDir = getString("MX_CLIENT_DIR", "client")
-	dataDir = getString("MX_DATA_DIR", "data")
+	serverProto   = getString("MX_SERVER_PROTO", "https://")
+	serverDomain  = getString("MX_SERVER_DOMAIN", "https://127.0.0.1")
+	serverPort    = getInt("PORT", 443)
+	serverPPort   = getInt("MX_SERVER_P_PORT", 8080)
+	clientDir     = getString("MX_CLIENT_DIR", "client")
+	dataDir       = getString("MX_DATA_DIR", "data")
 )
 
 // Authentication configurations
 var (
-	jwtSecretKey = getString("MX_JWT_SECRET_KEY", nil)
-	aesTextKey = getString("MX_AES_TEXT_KEY", nil)
-	aesFileKey = getString("MX_AES_FILE_KEY", nil)
-	compSecretPrefix = getString("MX_COMPANY_SECRET_PREFIX", "xtekram")
+	jwtSecretKey         = getString("MX_JWT_SECRET_KEY", nil)
+	aesTextKey           = getString("MX_AES_TEXT_KEY", nil)
+	aesFileKey           = getString("MX_AES_FILE_KEY", nil)
+	compSecretPrefix     = getString("MX_COMPANY_SECRET_PREFIX", "xtekram")
 	supportEmailHostname = getString("MX_SUPPORT_EMAIL_HOSTNAME",
 		"smtp.gmail.com")
-	supportEmailPort = getInt("MX_SUPPORT_EMAIL_PORT", 587)
-	supportEmail = getString("MX_SUPPORT_EMAIL", nil)
+	supportEmailPort     = getInt("MX_SUPPORT_EMAIL_PORT", 587)
+	supportEmail         = getString("MX_SUPPORT_EMAIL", nil)
 	supportEmailUsername = getString("MX_SUPPORT_EMAIL_USERNAME", nil)
 	supportEmailPassword = getString("MX_SUPPORT_EMAIL_PASSWORD", nil)
-	transactUrl = getString("MX_TRANSACT_URL", nil)
-	transactId = getString("MX_TRANSACT_ID", nil)
-	transactKey = getString("MX_TRANSACT_KEY", nil)
-	docusignUrl = getString("MX_DOCUSIGN_URL",
+	transactUrl          = getString("MX_TRANSACT_URL", nil)
+	transactId           = getString("MX_TRANSACT_ID", nil)
+	transactKey          = getString("MX_TRANSACT_KEY", nil)
+	docusignUrl          = getString("MX_DOCUSIGN_URL",
 		"https://demo.docusign.net/restapi/v2")
-	docusignUsername = getString("MX_DOCUSIGN_USERNAME", nil)
-	docusignPassword = getString("MX_DOCUSIGN_PASSWORD", nil)
-	docusignAccountId = getString("MX_DOCUSIGN_ACCOUNT_ID", nil)
-	docusignIntegratorKey = getString("MX_DOCUSIGN_INTEGRATOR_KEY", nil)
+	docusignUsername             = getString("MX_DOCUSIGN_USERNAME", nil)
+	docusignPassword             = getString("MX_DOCUSIGN_PASSWORD", nil)
+	docusignAccountId            = getString("MX_DOCUSIGN_ACCOUNT_ID", nil)
+	docusignIntegratorKey        = getString("MX_DOCUSIGN_INTEGRATOR_KEY", nil)
 	docusignSellEngagementLetter = getString(
 		"MX_DOCUSIGN_SELL_ENGAGEMENT_LETTER",
 		"d59cb209-3602-4d77-ab60-e15a1a2af4e8")
@@ -119,7 +119,7 @@ var (
 	docusignBuyDeSubscriptionAgreement = getString(
 		"MX_DOCUSIGN_BUY_DE_SUBSCRIPTION_AGREEMENT",
 		"5d19273a-5495-4ddf-b942-2dfccc568730")
-	wechatTokens = getStringArray("MX_WECHAT_TOKENS", []string{})
-	aliDayuAppKey = getString("ALI_DAYU_APP_KEY", "23463881")
+	wechatTokens     = getStringArray("MX_WECHAT_TOKENS", []string{})
+	aliDayuAppKey    = getString("ALI_DAYU_APP_KEY", "23463881")
 	aliDayuAppSecret = getString("ALI_DAYU_APP_SECRET", "7ef326a11df885f88788682016fdd8a2")
 )
