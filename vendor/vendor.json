@@ -1,0 +1,73 @@
+{
+	"comment": "",
+	"ignore": "test",
+	"package": [
+		{
+			"checksumSHA1": "CDOphCxF7dup+hBBVRpFeQhM9Jw=",
+			"path": "github.com/asaskevich/govalidator",
+			"revision": "593d64559f7600f29581a3ee42177f5dbded27a9",
+			"revisionTime": "2016-07-15T17:06:12Z"
+		},
+		{
+			"checksumSHA1": "CMfwCFcZRDJeIVVbIHa6t4Aewl8=",
+			"path": "github.com/dgrijalva/jwt-go",
+			"revision": "268038b363c7a8d7306b8e35bf77a1fde4b0c402",
+			"revisionTime": "2016-06-16T19:14:24Z"
+		},
+		{
+			"checksumSHA1": "xgjI2W3RGiQwNlxsOW2V9fJ9kaM=",
+			"path": "github.com/fsnotify/fsnotify",
+			"revision": "f12c6236fe7b5cf6bcf30e5935d08cb079d78334",
+			"revisionTime": "2016-08-16T05:15:41Z"
+		},
+		{
+			"checksumSHA1": "0p2I8vCO+Q5ArVveERbICv2Bhl8=",
+			"path": "github.com/jinzhu/gorm",
+			"revision": "f26fa242cc1bf884f9a4f98849f70fb8e73f441f",
+			"revisionTime": "2016-08-25T09:59:26Z"
+		},
+		{
+			"checksumSHA1": "ZtoqVjpOE8VF9n6Ebqyu4vTUYas=",
+			"path": "github.com/jinzhu/inflection",
+			"revision": "74387dc39a75e970e7a3ae6a3386b5bd2e5c5cff",
+			"revisionTime": "2016-08-17T01:46:01Z"
+		},
+		{
+			"checksumSHA1": "Drsz3oT4NmM2tVQCRk+occxVvPA=",
+			"path": "github.com/julienschmidt/httprouter",
+			"revision": "d8ff598a019f2c7bad0980917a588193cf26666e",
+			"revisionTime": "2016-08-10T19:53:38Z"
+		},
+		{
+			"checksumSHA1": "dNYxHiBLalTqluak2/Z8c3RsSEM=",
+			"path": "github.com/lib/pq",
+			"revision": "50761b0867bd1d9d069276790bcd4a3bccf2324a",
+			"revisionTime": "2016-08-31T22:25:20Z"
+		},
+		{
+			"checksumSHA1": "xppHi82MLqVx1eyQmbhTesAEjx8=",
+			"path": "github.com/lib/pq/oid",
+			"revision": "50761b0867bd1d9d069276790bcd4a3bccf2324a",
+			"revisionTime": "2016-08-31T22:25:20Z"
+		},
+		{
+			"checksumSHA1": "vE43s37+4CJ2CDU6TlOUOYE0K9c=",
+			"path": "golang.org/x/crypto/bcrypt",
+			"revision": "9e590154d2353f3f5e1b24da7275686040dcf491",
+			"revisionTime": "2016-09-02T16:03:59Z"
+		},
+		{
+			"checksumSHA1": "JsJdKXhz87gWenMwBeejTOeNE7k=",
+			"path": "golang.org/x/crypto/blowfish",
+			"revision": "9e590154d2353f3f5e1b24da7275686040dcf491",
+			"revisionTime": "2016-09-02T16:03:59Z"
+		},
+		{
+			"checksumSHA1": "8fD/im5Kwvy3JgmxulDTambmE8w=",
+			"path": "golang.org/x/sys/unix",
+			"revision": "a646d33e2ee3172a661fc09bca23bb4889a41bc8",
+			"revisionTime": "2016-07-15T05:43:45Z"
+		}
+	],
+	"rootPath": "git.themarketx.com/taiyangc/marketx-server"
+}
