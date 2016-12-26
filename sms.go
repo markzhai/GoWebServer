@@ -10,14 +10,22 @@ import (
 var s1 = rand.NewSource(time.Now().UTC().UnixNano())
 var r1 = rand.New(s1)
 
-func send(mobile string, code string) {
+func send(mobile string, code string) (bool, string) {
 	alidayu.AppKey = aliDayuAppKey
 	alidayu.AppSecret = aliDayuAppSecret
-	alidayu.UseHTTP = true
-	success, resp := alidayu.SendSMS(mobile, "源投信息", "SMS_16035023",
+	alidayu.UseHTTP = !useSsl
+	success, resp := alidayu.SendSMS(mobile, "源投金融", "SMS_26070193",
 		fmt.Sprintf(`{"product":"MarketX","code":"%v","timeout":"15分钟"}`, code))
-	fmt.Println("Success:", success)
-	fmt.Println(resp)
+
+	if serverLog != nil {
+		serverLog.Println("Success:", success)
+		serverLog.Println(resp)
+	} else {
+		fmt.Println("Success:", success)
+		fmt.Println(resp)
+	}
+
+	return success, resp
 }
 
 func generateCode() string {

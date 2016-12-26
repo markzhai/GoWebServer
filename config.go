@@ -120,6 +120,7 @@ var (
 		"MX_DOCUSIGN_BUY_DE_SUBSCRIPTION_AGREEMENT",
 		"5d19273a-5495-4ddf-b942-2dfccc568730")
 	wechatTokens     = getStringArray("MX_WECHAT_TOKENS", []string{})
-	aliDayuAppKey    = getString("ALI_DAYU_APP_KEY", "23463881")
-	aliDayuAppSecret = getString("ALI_DAYU_APP_SECRET", "7ef326a11df885f88788682016fdd8a2")
+	aliDayuAppKey    = getString("ALI_DAYU_APP_KEY", "23532365")
+	aliDayuAppSecret = getString("ALI_DAYU_APP_SECRET", "c9883ac3d0cfbec594e995827ffbedc3")
+	useSsl           = getBool("MX_USE_SSL", false)
 )

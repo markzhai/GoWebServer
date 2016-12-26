@@ -4,15 +4,15 @@ package main
 import (
 	"encoding/csv"
 	"fmt"
-	"log"
-	"net/http"
-	"os"
-	"strconv"
-	"strings"
-
 	"github.com/fsnotify/fsnotify"
 	"github.com/jinzhu/gorm"
 	_ "github.com/lib/pq"
+	"log"
+	"net/http"
+	"os"
+	"path"
+	"strconv"
+	"strings"
 )
 
 var (
@@ -404,7 +404,27 @@ func main() {
 	// Setup routes and start listening for requests
 	router := newServerRouter()
 
+	if useSsl {
+		go func() {
+			serverLog.Println("[MX] Starting redirect... @", serverPPort)
+			serverLog.Println("[MX] Stopping redirect...",
+				http.ListenAndServe(fmt.Sprintf(":%v", serverPPort),
+					http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+						http.Redirect(w, r, fmt.Sprintf("%v:%v%v",
+							serverDomain, serverPort, r.RequestURI),
+							http.StatusMovedPermanently)
+					})))
+		}()
+	}
+
 	serverLog.Println("[MX] Starting server... @", serverPort)
-	serverLog.Println("[MX] Stopping server...",
-		http.ListenAndServe(fmt.Sprintf(":%v", serverPort), router))
+	if useSsl {
+		serverLog.Println("[MX] Stopping server...",
+			http.ListenAndServeTLS(fmt.Sprintf(":%v", serverPort),
+				path.Join(dataDir, "cert.pem"), path.Join(dataDir, "key.pem"),
+				router))
+	} else {
+		serverLog.Println("[MX] Stopping server...",
+			http.ListenAndServe(fmt.Sprintf(":%v", serverPort), router))
+	}
 }

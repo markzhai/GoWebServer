@@ -16,7 +16,7 @@ import (
 var cache, ignore = lru.NewARC(1000)
 
 func mobileSendVerificationCodeHandler(w http.ResponseWriter, r *http.Request,
-ps httprouter.Params) {
+	ps httprouter.Params) {
 	phoneNumber, of := CheckLengthForm("", r, "phone_number",
 		PhoneMin, PhoneMax)
 
@@ -27,17 +27,18 @@ ps httprouter.Params) {
 
 	code := generateCode()
 	cache.Add(phoneNumber, code)
-	send(phoneNumber, code)
+	success, resp := send(phoneNumber, code)
 
-	formatReturn(w, r, ps, ErrorCodeNone, false,
-		map[string]interface{}{
-			"code":         code,
-			"phone_number": phoneNumber,
-		})
+	if success {
+		formatReturn(w, r, ps, ErrorCodeNone, false,
+			map[string]interface{}{"phone_number": phoneNumber})
+	} else {
+		formatReturnInfo(w, r, ps, ErrorCodeUnknown, resp, false, nil)
+	}
 }
 
 func mobileCheckVerificationCodeHandler(w http.ResponseWriter, r *http.Request,
-ps httprouter.Params) {
+	ps httprouter.Params) {
 	phoneNumber, of := CheckLengthForm("", r, "phone_number", PhoneMin, PhoneMax)
 	code, of := CheckFieldForm(of, r, "code")
 
@@ -204,7 +205,7 @@ func accountRegisterHandler(w http.ResponseWriter, r *http.Request, ps httproute
 	}
 
 	// Generate email activation code
-	b := make([]byte, TokenMinMax / 2)
+	b := make([]byte, TokenMinMax/2)
 	crand.Read(b)
 	emailToken := fmt.Sprintf("%x", b)
 
@@ -240,7 +241,7 @@ func accountRegisterHandler(w http.ResponseWriter, r *http.Request, ps httproute
 
 	if citizenType != CitizenTypeOther {
 		// Now send activation email non-blocking
-		reqLang := ps[len(ps) - 2].Value
+		reqLang := ps[len(ps)-2].Value
 		author := EmailTexts[reqLang][EmailTextName]
 		subject := EmailTexts[reqLang][EmailTextSubjectRegister]
 		link := fmt.Sprintf(emailConfirmLink, serverDomain, emailToken)
@@ -257,7 +258,7 @@ func accountRegisterHandler(w http.ResponseWriter, r *http.Request, ps httproute
 
 // TODO: it should be an account confirm function from phone code verification
 func accountStateUpdate(w http.ResponseWriter, r *http.Request,
-ps httprouter.Params, u *User) {
+	ps httprouter.Params, u *User) {
 	if u.UserState < UserStateConfirmed {
 		u.UserState = UserStateConfirmed
 		if dbConn.Save(u).Error != nil {
@@ -270,7 +271,7 @@ ps httprouter.Params, u *User) {
 }
 
 func accountLoginHandler(w http.ResponseWriter, r *http.Request,
-ps httprouter.Params) {
+	ps httprouter.Params) {
 
 	confirm, cof := CheckLengthForm("", r, "confirm",
 		TokenMinMax, TokenMinMax)
@@ -361,7 +362,7 @@ ps httprouter.Params) {
 }
 
 func accountConfirmHandler(w http.ResponseWriter, r *http.Request,
-ps httprouter.Params, u *User) {
+	ps httprouter.Params, u *User) {
 	// If user state isn't inactive there is nothing to confirm
 	if u.UserState != UserStateInactive {
 		formatReturn(w, r, ps, ErrorCodeConfirmError, true, nil)
@@ -369,7 +370,7 @@ ps httprouter.Params, u *User) {
 	}
 
 	// Generate a new email activation code
-	b := make([]byte, TokenMinMax / 2)
+	b := make([]byte, TokenMinMax/2)
 	crand.Read(b)
 	emailToken := fmt.Sprintf("%x", b)
 	u.EmailToken = emailToken
@@ -380,7 +381,7 @@ ps httprouter.Params, u *User) {
 	}
 
 	// Now send activation email non-blocking
-	reqLang := ps[len(ps) - 2].Value
+	reqLang := ps[len(ps)-2].Value
 	author := EmailTexts[reqLang][EmailTextName]
 	subject := EmailTexts[reqLang][EmailTextSubjectRegister]
 	link := fmt.Sprintf(emailConfirmLink, serverDomain, emailToken)
@@ -392,7 +393,7 @@ ps httprouter.Params, u *User) {
 }
 
 func accountRecoverHandler(w http.ResponseWriter, r *http.Request,
-ps httprouter.Params) {
+	ps httprouter.Params) {
 	confirm, of := CheckLengthForm("", r, "confirm",
 		TokenMinMax, TokenMinMax)
 	password, of := CheckLengthForm(of, r, "password",
@@ -442,7 +443,7 @@ ps httprouter.Params) {
 }
 
 func accountForgetHandler(w http.ResponseWriter, r *http.Request,
-ps httprouter.Params) {
+	ps httprouter.Params) {
 	email, of := CheckEmailForm("", r, "email")
 
 	if of != "" {
@@ -459,7 +460,7 @@ ps httprouter.Params) {
 	}
 
 	// Generate a new password reset code
-	b := make([]byte, TokenMinMax / 2)
+	b := make([]byte, TokenMinMax/2)
 	crand.Read(b)
 	passwordToken := fmt.Sprintf("%x", b)
 	currentUser.PasswordToken = passwordToken
@@ -470,7 +471,7 @@ ps httprouter.Params) {
 	}
 
 	// Now send reset email non-blocking
-	reqLang := ps[len(ps) - 2].Value
+	reqLang := ps[len(ps)-2].Value
 	author := EmailTexts[reqLang][EmailTextName]
 	subject := EmailTexts[reqLang][EmailTextSubjectForgetPassword]
 	link := fmt.Sprintf(emailForgetLink, serverDomain, passwordToken)
@@ -483,7 +484,7 @@ ps httprouter.Params) {
 }
 
 func accountChangeHandler(w http.ResponseWriter, r *http.Request,
-ps httprouter.Params, u *User) {
+	ps httprouter.Params, u *User) {
 	oldPassword, of := CheckLengthForm("", r, "old_password",
 		PasswordMinMax, PasswordMinMax)
 	newPassword, of := CheckLengthForm(of, r, "new_password",

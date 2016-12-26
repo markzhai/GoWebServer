@@ -7,7 +7,7 @@ import (
 )
 
 func wechatAddHandler(w http.ResponseWriter, r *http.Request,
-ps httprouter.Params) {
+	ps httprouter.Params) {
 	// All params must be present
 	openID, of := CheckLengthForm("", r, "openid",
 		OpenIdMinMax, OpenIdMinMax)
@@ -61,7 +61,7 @@ ps httprouter.Params) {
 }
 
 func wechatIdHandler(w http.ResponseWriter, r *http.Request,
-ps httprouter.Params) {
+	ps httprouter.Params) {
 	unionId, ok := CheckLength(true, ps.ByName("id"),
 		OpenIdMinMax, OpenIdMinMax)
 

@@ -12,7 +12,7 @@ import (
 )
 
 func userNdaHandler(w http.ResponseWriter, r *http.Request,
-ps httprouter.Params, u *User) {
+	ps httprouter.Params, u *User) {
 	// State must be after confirmed and accred if investor
 	if (u.RoleType == RoleTypeShareholder && u.UserState < UserStateConfirmed) ||
 		(u.RoleType == RoleTypeInvestor && u.UserState < UserStateAccred) {
@@ -178,7 +178,7 @@ func userInvestorFieldCheck(r *http.Request, u *User) string {
 // This is a nice helper to various parts of updating functions
 // Returns a tuple (invalid parameter, has error)
 func userKycFieldCheck(r *http.Request, u *User,
-ctForce bool, ctImmutable bool) (string, bool) {
+	ctForce bool, ctImmutable bool) (string, bool) {
 	// We save as many valid fields as possible
 	allof := ""
 
@@ -327,7 +327,7 @@ const registerConfirmEmailTemplate = `Hello MarketX,
 `
 
 func userKycHandler(w http.ResponseWriter, r *http.Request,
-ps httprouter.Params, u *User) {
+	ps httprouter.Params, u *User) {
 	// State must be after nda
 	if u.UserState < UserStateNdaAgreed {
 		formatReturn(w, r, ps, ErrorCodeKycError, true, nil)
@@ -371,7 +371,7 @@ ps httprouter.Params, u *User) {
 }
 
 func userKycQuestionsHandler(w http.ResponseWriter, r *http.Request,
-ps httprouter.Params, u *User) {
+	ps httprouter.Params, u *User) {
 	// State must be after saving kyc information
 	if u.UserState < UserStateKycWaitingQuestions ||
 		u.UserState == UserStateKycFailed {
@@ -429,7 +429,7 @@ ps httprouter.Params, u *User) {
 }
 
 func userKycCheckHandler(w http.ResponseWriter, r *http.Request,
-ps httprouter.Params, u *User) {
+	ps httprouter.Params, u *User) {
 	// State must be after saving kyc information
 	if u.UserState < UserStateKycWaitingQuestions ||
 		u.UserState == UserStateKycFailed {
@@ -521,7 +521,7 @@ ps httprouter.Params, u *User) {
 }
 
 func userUploadIdHandler(w http.ResponseWriter, r *http.Request,
-ps httprouter.Params, u *User) {
+	ps httprouter.Params, u *User) {
 	// State must be after kyc basic info for non-US
 	// and after active for US
 	if (u.CitizenType == CitizenTypeOther &&
@@ -569,7 +569,7 @@ ps httprouter.Params, u *User) {
 }
 
 func userSelfAccredHandler(w http.ResponseWriter, r *http.Request,
-ps httprouter.Params, u *User) {
+	ps httprouter.Params, u *User) {
 	// Only support investor sign up which is before nda
 	if u.RoleType != RoleTypeInvestor ||
 		u.UserState < UserStateConfirmed {
@@ -608,7 +608,7 @@ ps httprouter.Params, u *User) {
 }
 
 func userSelfAccredSwitchHandler(w http.ResponseWriter, r *http.Request,
-ps httprouter.Params, u *User) {
+	ps httprouter.Params, u *User) {
 	// Only support shareholder investing switch, which is after active
 	if u.RoleType != RoleTypeShareholder ||
 		u.UserState < UserStateActive {
@@ -657,7 +657,7 @@ ps httprouter.Params, u *User) {
 }
 
 func userHandler(w http.ResponseWriter, r *http.Request,
-ps httprouter.Params, u *User) {
+	ps httprouter.Params, u *User) {
 	// State must be after confirmed
 	if u.UserState < UserStateConfirmed {
 		formatReturn(w, r, ps, ErrorCodeUserNotOnboard, true, nil)
@@ -775,7 +775,7 @@ ps httprouter.Params, u *User) {
 }
 
 func userUpdateHandler(w http.ResponseWriter, r *http.Request,
-ps httprouter.Params, u *User) {
+	ps httprouter.Params, u *User) {
 	// State must be active for respective resident types
 	if (u.CitizenType == CitizenTypeOther &&
 		u.UserState < UserStateActiveId) ||
@@ -837,13 +837,13 @@ ps httprouter.Params, u *User) {
 }
 
 func userPhotoIdHandler(w http.ResponseWriter, r *http.Request,
-ps httprouter.Params, u *User) {
+	ps httprouter.Params, u *User) {
 	pifc := path.Join(dataDir, "user", fmt.Sprintf("%v", u.ID), "photo_id")
 	parseFileDownload(w, r, u.PhotoIDType, pifc)
 }
 
 func userPhotoIdTokenHandler(w http.ResponseWriter, r *http.Request,
-ps httprouter.Params) {
+	ps httprouter.Params) {
 	token, ok := CheckLength(true, ps.ByName("token"),
 		TokenMinMax, TokenMinMax)
 	if !ok {
@@ -861,7 +861,7 @@ ps httprouter.Params) {
 }
 
 func userSellsHandler(w http.ResponseWriter, r *http.Request,
-ps httprouter.Params, u *User) {
+	ps httprouter.Params, u *User) {
 	if u.UserState < UserStateActiveId {
 		formatReturn(w, r, ps, ErrorCodeUserDealStateError, true, nil)
 		return
@@ -912,7 +912,7 @@ ps httprouter.Params, u *User) {
 }
 
 func userBuysHandler(w http.ResponseWriter, r *http.Request,
-ps httprouter.Params, u *User) {
+	ps httprouter.Params, u *User) {
 	if u.UserState < UserStateActiveAccredId {
 		formatReturn(w, r, ps, ErrorCodeUserDealStateError, true, nil)
 		return

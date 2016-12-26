@@ -298,7 +298,6 @@ var EmailTexts = map[string][]string{
 
 <p>If the link doesn't work, you could also use this link to confirm your registration:<br>
 %v</p>
-
 <p>Best regards,</p>
 
 <p>Team MarketX</p>

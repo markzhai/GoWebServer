@@ -3,28 +3,44 @@
 	"ignore": "test",
 	"package": [
 		{
-			"checksumSHA1": "CDOphCxF7dup+hBBVRpFeQhM9Jw=",
+			"path": "alidayu",
+			"revision": ""
+		},
+		{
+			"checksumSHA1": "BdLdZP/C2uOO3lqk9X3NCKFpXa4=",
 			"path": "github.com/asaskevich/govalidator",
-			"revision": "593d64559f7600f29581a3ee42177f5dbded27a9",
-			"revisionTime": "2016-07-15T17:06:12Z"
+			"revision": "7b3beb6df3c42abd3509abfc3bcacc0fbfb7c877",
+			"revisionTime": "2016-10-01T16:31:30Z"
 		},
 		{
-			"checksumSHA1": "CMfwCFcZRDJeIVVbIHa6t4Aewl8=",
+			"checksumSHA1": "EsJksAKyY2+r3mY+rdNocSCe1wg=",
 			"path": "github.com/dgrijalva/jwt-go",
-			"revision": "268038b363c7a8d7306b8e35bf77a1fde4b0c402",
-			"revisionTime": "2016-06-16T19:14:24Z"
+			"revision": "24c63f56522a87ec5339cc3567883f1039378fdb",
+			"revisionTime": "2016-08-31T18:35:34Z"
 		},
 		{
-			"checksumSHA1": "xgjI2W3RGiQwNlxsOW2V9fJ9kaM=",
+			"checksumSHA1": "dnQMyxdsLDKd6NHD0naLAqguz6U=",
 			"path": "github.com/fsnotify/fsnotify",
-			"revision": "f12c6236fe7b5cf6bcf30e5935d08cb079d78334",
-			"revisionTime": "2016-08-16T05:15:41Z"
+			"revision": "c07fd863aee264025aa0ef438bf9d2046c803493",
+			"revisionTime": "2016-10-02T05:17:20Z"
 		},
 		{
-			"checksumSHA1": "0p2I8vCO+Q5ArVveERbICv2Bhl8=",
+			"checksumSHA1": "d9PxF1XQGLMJZRct2R8qVM/eYlE=",
+			"path": "github.com/hashicorp/golang-lru",
+			"revision": "0a025b7e63adc15a622f29b0b2c4c3848243bbf6",
+			"revisionTime": "2016-08-13T22:13:03Z"
+		},
+		{
+			"checksumSHA1": "9hffs0bAIU6CquiRhKQdzjHnKt0=",
+			"path": "github.com/hashicorp/golang-lru/simplelru",
+			"revision": "0a025b7e63adc15a622f29b0b2c4c3848243bbf6",
+			"revisionTime": "2016-08-13T22:13:03Z"
+		},
+		{
+			"checksumSHA1": "mbc/6nGk8sKvLJ5BhqWqnQU2tUs=",
 			"path": "github.com/jinzhu/gorm",
-			"revision": "f26fa242cc1bf884f9a4f98849f70fb8e73f441f",
-			"revisionTime": "2016-08-25T09:59:26Z"
+			"revision": "5ec2f6ceb66dbb99077a2b48a5a963d073d5459d",
+			"revisionTime": "2016-09-25T06:26:37Z"
 		},
 		{
 			"checksumSHA1": "ZtoqVjpOE8VF9n6Ebqyu4vTUYas=",
@@ -53,21 +69,21 @@
 		{
 			"checksumSHA1": "vE43s37+4CJ2CDU6TlOUOYE0K9c=",
 			"path": "golang.org/x/crypto/bcrypt",
-			"revision": "9e590154d2353f3f5e1b24da7275686040dcf491",
-			"revisionTime": "2016-09-02T16:03:59Z"
+			"revision": "84e98f45760e87786b7f24603b8166a6fa09811d",
+			"revisionTime": "2016-10-02T07:45:08Z"
 		},
 		{
 			"checksumSHA1": "JsJdKXhz87gWenMwBeejTOeNE7k=",
 			"path": "golang.org/x/crypto/blowfish",
-			"revision": "9e590154d2353f3f5e1b24da7275686040dcf491",
-			"revisionTime": "2016-09-02T16:03:59Z"
+			"revision": "84e98f45760e87786b7f24603b8166a6fa09811d",
+			"revisionTime": "2016-10-02T07:45:08Z"
 		},
 		{
-			"checksumSHA1": "8fD/im5Kwvy3JgmxulDTambmE8w=",
+			"checksumSHA1": "vu7njn8O4vhFtmgGWntwjA2NAbk=",
 			"path": "golang.org/x/sys/unix",
-			"revision": "a646d33e2ee3172a661fc09bca23bb4889a41bc8",
-			"revisionTime": "2016-07-15T05:43:45Z"
+			"revision": "8f0908ab3b2457e2e15403d3697c9ef5cb4b57a9",
+			"revisionTime": "2016-09-14T20:33:16Z"
 		}
 	],
-	"rootPath": "git.themarketx.com/taiyangc/marketx-server"
+	"rootPath": "marketx-server"
 }
