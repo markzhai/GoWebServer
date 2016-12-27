@@ -478,6 +478,8 @@ func newServerRouter() *httprouter.Router {
 		logProtect(authProtect(userSelfAccredHandler)))
 	router.POST("/user/upload_id",
 		logProtect(authProtect(userUploadIdHandler)))
+	router.POST("/user/upload_business_card",
+		logProtect(authProtect(userUploadBusinessCardHandler)))
 	router.PUT("/user/self_accred_switch",
 		logProtect(authProtect(userSelfAccredSwitchHandler)))
 	router.GET("/user", logProtect(authProtect(userHandler)))
