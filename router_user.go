@@ -298,6 +298,24 @@ func userKycFieldCheck(r *http.Request, u *User,
 			//formatReturn(w, r, ps, ErrorCodeIdCardInvalid, false, nil)
 			allof = of
 		}
+    weixin, of := CheckFieldForm(of, r, "weixin")
+    if of == "" {
+      u.Weixin = weixin
+    } else if allof == "" {
+      allof = of
+    }
+    employer, of := CheckFieldForm(of, r, "employer")
+    if of == "" {
+      u.Employer = employer
+    } else if allof == "" {
+      allof = of
+    }
+    occupation, of := CheckFieldForm("", r, "occupation")
+    if of == "" {
+      u.Occupation = occupation
+    } else if allof == "" {
+      allof = of
+    }
 	}
 
 	// Check common investor fields if we are at an investor stage
@@ -557,6 +575,29 @@ func userUploadIdHandler(w http.ResponseWriter, r *http.Request,
 			u.UserState = UserStateActiveAccredId
 		}
 	}
+
+	// Only change state if changed
+	if dbConn.Save(u).Error != nil {
+		formatReturn(w, r, ps, ErrorCodeUploadIdError, true, nil)
+		return
+	}
+
+	// Return the good link relative path
+	saveLogin(w, r, ps, false, u, nil)
+}
+
+func userUploadBusinessCardHandler(w http.ResponseWriter, r *http.Request,
+	ps httprouter.Params, u *User) {
+	// Parse photo id
+	furl, _, ftype, err := parseFileUpload(r, "business_card", "user",
+		u.ID, "business_card")
+	if err != nil {
+		formatReturn(w, r, ps, ErrorCodeUploadIdError, true, nil)
+		return
+	}
+	u.BusinessCardPic = furl
+	u.BusinessCardType = ftype
+	u.BusinessCardToken, u.BusinessCardName = createFileTokenName("photo_id", ftype)
 
 	// Only change state if changed
 	if dbConn.Save(u).Error != nil {

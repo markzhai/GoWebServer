@@ -141,7 +141,7 @@ func wechatBindHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Par
 func accountRegisterHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	firstName, ignore := CheckFieldForm("", r, "first_name")
 	lastName, ignore := CheckFieldForm("", r, "last_name")
-	roleType, of := CheckRangeForm("", r, "role_type", RoleTypeInvestor)
+	roleType, ignore := CheckRangeForm("", r, "role_type", RoleTypeInvestor)
 	citizenType, of := CheckRangeForm(of, r, "citizen_type", CitizenTypeOther)
 
 	var phoneNumber = ""
@@ -168,12 +168,12 @@ func accountRegisterHandler(w http.ResponseWriter, r *http.Request, ps httproute
 		email, of = CheckEmailForm(of, r, "email")
 	}
 
+	password, of := CheckLengthForm("", r, "password", PasswordMinMax, PasswordMinMax)
+
 	if of != "" {
 		formatReturnInfo(w, r, ps, ErrorFmtCodeBadArgument, of, false, nil)
 		return
 	}
-
-	password, of := CheckLengthForm("", r, "password", PasswordMinMax, PasswordMinMax)
 
 	email = strings.ToLower(email)
 	if citizenType == CitizenTypeOther {

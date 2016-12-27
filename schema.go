@@ -211,6 +211,13 @@ type User struct {
 	PhotoIDName                        string
 	PhotoIDType                        string
 	PhotoIDToken                       string `sql:"index"`
+
+  BusinessCardPic                    string
+	BusinessCardName                   string
+	BusinessCardType                   string
+	BusinessCardToken                  string `sql:"index"`
+  Weixin                             string
+
 	Dob                                string
 	Address1                           string
 	Address2                           string
