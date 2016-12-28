@@ -142,7 +142,7 @@ func accountRegisterHandler(w http.ResponseWriter, r *http.Request, ps httproute
 	firstName, ignore := CheckFieldForm("", r, "first_name")
 	lastName, ignore := CheckFieldForm("", r, "last_name")
 	roleType, ignore := CheckRangeForm("", r, "role_type", RoleTypeInvestor)
-	citizenType, of := CheckRangeForm(of, r, "citizen_type", CitizenTypeOther)
+	citizenType, of := CheckRangeForm("", r, "citizen_type", CitizenTypeOther)
 
 	var phoneNumber = ""
 	var email = ""

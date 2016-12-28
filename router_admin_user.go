@@ -78,6 +78,18 @@ func adminUserIdHandler(w http.ResponseWriter, r *http.Request,
 		}
 	}
 
+	// If user does not have a valid photo id token yet, generate it
+	if uint64(len(user.BusinessCardToken)) != TokenMinMax {
+		pifc := path.Join(dataDir, "user", fmt.Sprintf("%v", user.ID),
+			"business_card")
+		if _, err := os.Stat(pifc); err == nil {
+			user.BusinessCardToken, user.BusinessCardName =
+				createFileTokenName("business_card", user.BusinessCardType)
+			// Ignore saving errors just don't return
+			dbConn.Save(user)
+		}
+	}
+
 	// Return all allowed information about user
 	saveAdmin(w, r, ps, u, map[string]interface{}{
 		"user_state":                  user.UserState,
@@ -98,6 +110,8 @@ func adminUserIdHandler(w http.ResponseWriter, r *http.Request,
 		"ssn":                         decField(user.SsnEncrypted),
 		"photo_id":                    user.PhotoIDToken,
 		"photo_id_filename":           user.PhotoIDName,
+		"business_card":               user.BusinessCardToken,
+		"business_card_filename":      user.BusinessCardName,
 		"employment_type":             user.EmploymentType,
 		"employer":                    user.Employer,
 		"occupation":                  user.Occupation,

@@ -182,37 +182,32 @@ func userKycFieldCheck(r *http.Request, u *User,
 	// We save as many valid fields as possible
 	allof := ""
 
-	dob, of := CheckDateForm("", r, "dob")
-	if of == "" {
+	dob, ignore := CheckDateForm("", r, "dob")
+	if ignore == "" {
 		u.Dob = dob
-	} else if allof == "" {
-		allof = of
 	}
 
-	phoneNumber, of := CheckLengthForm("", r, "phone_number", PhoneMin, PhoneMax)
-	if of == "" {
+	phoneNumber, ignore := CheckLengthForm("", r, "phone_number", PhoneMin, PhoneMax)
+	if ignore == "" {
 		u.PhoneNumber = phoneNumber
-	} else if allof == "" {
-		allof = of
 	}
 
-	address1, of := CheckFieldForm("", r, "address1")
-	if of == "" {
+	address1, ignore := CheckFieldForm("", r, "address1")
+	if ignore == "" {
 		u.Address1 = address1
-	} else if allof == "" {
-		allof = of
 	}
 
-	// optional
 	address2, of := CheckFieldForm("", r, "address2")
 	if of == "" {
 		u.Address2 = address2
 	}
-	firstName, of := CheckFieldForm("", r, "first_name")
+
+  firstName, of := CheckFieldForm("", r, "first_name")
 	if of == "" {
 		u.FirstName = firstName
 	}
-	lastName, of := CheckFieldForm("", r, "last_name")
+
+  lastName, of := CheckFieldForm("", r, "last_name")
 	if of == "" {
 		u.LastName = lastName
 	}
@@ -221,21 +216,20 @@ func userKycFieldCheck(r *http.Request, u *User,
 	city, of := CheckFieldForm("", r, "city")
 	if of == "" {
 		u.City = city
-	} else if allof == "" {
-		allof = of
 	}
+
 	zip, of := CheckLengthForm("", r, "zip", ZipMin, ZipMax)
 	if of == "" {
 		u.Zip = zip
-	} else if allof == "" {
-		allof = of
 	}
+
 	country, of := CheckLengthForm("", r, "country",
 		CountryMinMax, CountryMinMax)
 	if of == "" {
 		u.Country = country
-	} // country is optional
-	citizenType, of := CheckRangeForm("", r, "citizen_type",
+	}
+
+  citizenType, of := CheckRangeForm("", r, "citizen_type",
 		CitizenTypeOther)
 	// Special field controlled by ctImmutable and ctForce
 	if of == "" {
@@ -251,7 +245,8 @@ func userKycFieldCheck(r *http.Request, u *User,
 		}
 		citizenType = u.CitizenType
 	}
-	// Only US residents have SSNs
+
+  // Only US residents have SSNs
 	if citizenType != CitizenTypeOther {
 		ssn, of := CheckSSNForm("", r, "ssn")
 		if of == "" {
@@ -271,8 +266,6 @@ func userKycFieldCheck(r *http.Request, u *User,
 	}
 	if of == "" {
 		u.State = state
-	} else if allof == "" {
-		allof = of
 	}
 
 	password, of := CheckLengthForm("", r, "password", PasswordMinMax, PasswordMinMax)
@@ -286,35 +279,24 @@ func userKycFieldCheck(r *http.Request, u *User,
 		} else {
 			u.PasswordHash = string(passwordHash)
 		}
-	} else if allof == "" {
-		allof = of
 	}
 
 	if u.CitizenType == CitizenTypeOther {
 		idCardNumber, of := CheckIdCardForm(of, r, "id_card_number")
 		if of == "" {
 			u.IDCardNumber = idCardNumber
-		} else if allof == "" {
-			//formatReturn(w, r, ps, ErrorCodeIdCardInvalid, false, nil)
-			allof = of
 		}
     weixin, of := CheckFieldForm(of, r, "weixin")
     if of == "" {
       u.Weixin = weixin
-    } else if allof == "" {
-      allof = of
     }
     employer, of := CheckFieldForm(of, r, "employer")
     if of == "" {
       u.Employer = employer
-    } else if allof == "" {
-      allof = of
     }
     occupation, of := CheckFieldForm("", r, "occupation")
     if of == "" {
       u.Occupation = occupation
-    } else if allof == "" {
-      allof = of
     }
 	}
 
@@ -323,10 +305,7 @@ func userKycFieldCheck(r *http.Request, u *User,
 	if (u.RoleType == RoleTypeInvestor && u.UserState >= UserStateAccred) ||
 		(u.RoleType == RoleTypeShareholder && u.UserState >= UserStateActive) {
 		// Must check for side effects (partial edits)
-		invof := userInvestorFieldCheck(r, u)
-		if allof == "" {
-			allof = invof
-		}
+		userInvestorFieldCheck(r, u)
 	}
 
 	return allof, true
@@ -597,7 +576,7 @@ func userUploadBusinessCardHandler(w http.ResponseWriter, r *http.Request,
 	}
 	u.BusinessCardPic = furl
 	u.BusinessCardType = ftype
-	u.BusinessCardToken, u.BusinessCardName = createFileTokenName("photo_id", ftype)
+	u.BusinessCardToken, u.BusinessCardName = createFileTokenName("business_card", ftype)
 
 	// Only change state if changed
 	if dbConn.Save(u).Error != nil {
@@ -605,8 +584,8 @@ func userUploadBusinessCardHandler(w http.ResponseWriter, r *http.Request,
 		return
 	}
 
-	// Return the good link relative path
-	saveLogin(w, r, ps, false, u, nil)
+  formatReturn(w, r, ps, ErrorCodeNone, true,
+    map[string]interface{}{"business_card": u.BusinessCardToken})
 }
 
 func userSelfAccredHandler(w http.ResponseWriter, r *http.Request,
@@ -786,6 +765,17 @@ func userHandler(w http.ResponseWriter, r *http.Request,
 		}
 	}
 
+	pifc := path.Join(dataDir, "user", fmt.Sprintf("%v", u.ID),
+		"business_card")
+	if _, err := os.Stat(pifc); err == nil {
+		u.BusinessCardToken, _ = createFileTokenName("business_card", "")
+		// Ignore saving errors just don't return
+		if dbConn.Save(u).Error == nil {
+			info["business_card"] = u.BusinessCardToken
+			info["business_card_filename"] = u.BusinessCardName
+		}
+	}
+
 	// Return the number of buys/sells for easier front-end display
 	if u.UserState >= UserStateActive {
 		var dis []DealInvestor
@@ -899,6 +889,28 @@ func userPhotoIdTokenHandler(w http.ResponseWriter, r *http.Request,
 
 	pifc := path.Join(dataDir, "user", fmt.Sprintf("%v", user.ID), "photo_id")
 	parseFileDownload(w, r, user.PhotoIDType, pifc)
+}
+
+func userBusinessCardHandler(w http.ResponseWriter, r *http.Request,
+	ps httprouter.Params, u *User) {
+	pifc := path.Join(dataDir, "user", fmt.Sprintf("%v", u.ID), "business_card")
+	parseFileDownload(w, r, u.BusinessCardType, pifc)
+}
+
+func userBusinessCardTokenHandler(w http.ResponseWriter, r *http.Request,
+	ps httprouter.Params) {
+	token, ok := CheckLength(true, ps.ByName("token"), TokenMinMax, TokenMinMax)
+	if !ok {
+		return
+	}
+
+	var user User
+	if dbConn.First(&user, "business_card_token = ?", token).RecordNotFound() {
+		return
+	}
+
+	pifc := path.Join(dataDir, "user", fmt.Sprintf("%v", user.ID), "business_card")
+	parseFileDownload(w, r, user.BusinessCardType, pifc)
 }
 
 func userSellsHandler(w http.ResponseWriter, r *http.Request,

@@ -486,6 +486,8 @@ func newServerRouter() *httprouter.Router {
 	router.PUT("/user", logProtect(authProtect(userUpdateHandler)))
 	router.GET("/user/photo_id", logProtect(authProtect(userPhotoIdHandler)))
 	router.GET("/user/photo_id/:token", logProtect(userPhotoIdTokenHandler))
+	router.GET("/user/business_card", logProtect(authProtect(userBusinessCardHandler)))
+	router.GET("/user/business_card/:token", logProtect(userBusinessCardTokenHandler))
 	router.GET("/user/sells", logProtect(authProtect(userSellsHandler)))
 	router.GET("/user/buys", logProtect(authProtect(userBuysHandler)))
 
