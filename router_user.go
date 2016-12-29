@@ -288,7 +288,7 @@ func userKycFieldCheck(r *http.Request, u *User,
 		}
 	}
 
-  weixin, of := CheckFieldForm("" r, "weixin")
+  weixin, of := CheckFieldForm("", r, "weixin")
   if of == "" {
     u.Weixin = weixin
   }
@@ -343,7 +343,7 @@ func userKycHandler(w http.ResponseWriter, r *http.Request,
     email, of := CheckEmailForm("", r, "email")
     if of == "" {
       if !dbConn.First(&User{}, "email = ?", email).RecordNotFound() {
-        formatReturn(w, r, ps, ErrorCodeEmailExists, false, nil)
+        formatReturn(w, r, ps, ErrorCodeEmailExists, true, nil)
         return
       }
       u.Email = email
@@ -353,8 +353,9 @@ func userKycHandler(w http.ResponseWriter, r *http.Request,
   // Advance state based on citizen type
 	if allof == "" {
 		if u.CitizenType == CitizenTypeOther &&
-			u.UserState < UserStateKycWaitingId {
-			u.UserState = UserStateKycWaitingId
+			u.UserState <= UserStateKycWaitingId {
+			// u.UserState = UserStateKycWaitingId
+			u.UserState = UserStateActiveId
 		} else if u.CitizenType != CitizenTypeOther &&
 			u.UserState < UserStateKycWaitingQuestions {
 			u.UserState = UserStateKycWaitingQuestions
