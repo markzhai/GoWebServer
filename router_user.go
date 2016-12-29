@@ -286,19 +286,20 @@ func userKycFieldCheck(r *http.Request, u *User,
 		if of == "" {
 			u.IDCardNumber = idCardNumber
 		}
-    weixin, of := CheckFieldForm(of, r, "weixin")
-    if of == "" {
-      u.Weixin = weixin
-    }
-    employer, of := CheckFieldForm(of, r, "employer")
-    if of == "" {
-      u.Employer = employer
-    }
-    occupation, of := CheckFieldForm("", r, "occupation")
-    if of == "" {
-      u.Occupation = occupation
-    }
 	}
+
+  weixin, of := CheckFieldForm("" r, "weixin")
+  if of == "" {
+    u.Weixin = weixin
+  }
+  employer, of := CheckFieldForm("", r, "employer")
+  if of == "" {
+    u.Employer = employer
+  }
+  occupation, of := CheckFieldForm("", r, "occupation")
+  if of == "" {
+    u.Occupation = occupation
+  }
 
 	// Check common investor fields if we are at an investor stage
 	// or shareholder with enough power to switch
@@ -338,7 +339,18 @@ func userKycHandler(w http.ResponseWriter, r *http.Request,
 		return
 	}
 
-	// Advance state based on citizen type
+  if u.CitizenType == CitizenTypeOther {
+    email, of := CheckEmailForm("", r, "email")
+    if of == "" {
+      if !dbConn.First(&User{}, "email = ?", email).RecordNotFound() {
+        formatReturn(w, r, ps, ErrorCodeEmailExists, false, nil)
+        return
+      }
+      u.Email = email
+    }
+  }
+
+  // Advance state based on citizen type
 	if allof == "" {
 		if u.CitizenType == CitizenTypeOther &&
 			u.UserState < UserStateKycWaitingId {
